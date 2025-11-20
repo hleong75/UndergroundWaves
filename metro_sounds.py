@@ -183,6 +183,202 @@ class MetroSoundSimulator:
         modulation = 1 + 0.5 * np.sin(2 * np.pi * 120 * t)  # 120 Hz modulation
         
         return carrier * modulation
+    
+    def generate_wheel_flange_squeal(self, duration: float = 1.5, amplitude: float = 0.35) -> np.ndarray:
+        """
+        Generate wheel flange squeal sound (when wheel flanges rub against rail sides on curves).
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
+        
+        # High-pitched metallic squeal - multiple frequency components
+        squeal1 = self.generate_sweep(1200, 1800, duration, amplitude * 0.6)
+        squeal2 = self.generate_sweep(900, 1500, duration, amplitude * 0.4)
+        squeal3 = self.generate_sweep(1500, 2200, duration, amplitude * 0.3)
+        
+        # Add irregular pulsing for realistic flange contact
+        pulse_freq = random.uniform(6, 12)  # Pulsing at 6-12 Hz
+        pulse_modulation = 0.5 + 0.5 * np.abs(np.sin(2 * np.pi * pulse_freq * t))
+        
+        # Combine squeals with pulsing
+        combined = np.zeros(samples)
+        combined[:len(squeal1)] += squeal1
+        combined[:len(squeal2)] += squeal2
+        combined[:len(squeal3)] += squeal3
+        combined = combined * pulse_modulation
+        
+        # Add some grinding noise component
+        grinding = self.generate_noise(duration, amplitude * 0.2, low_freq=600, high_freq=3000)
+        combined[:len(grinding)] += grinding
+        
+        # Apply envelope for realistic onset/release
+        envelope = np.ones(samples)
+        fade_samples = int(0.2 * self.sample_rate)
+        envelope[:fade_samples] = np.linspace(0, 1, fade_samples)
+        envelope[-fade_samples:] = np.linspace(1, 0, fade_samples)
+        
+        return combined * envelope
+    
+    def generate_rail_joint_clicks(self, duration: float, interval: float = 0.8, 
+                                   amplitude: float = 0.15) -> np.ndarray:
+        """
+        Generate rhythmic rail joint clicking sounds (clickety-clack pattern).
+        
+        Args:
+            duration: Duration in seconds
+            interval: Time between clicks in seconds (represents rail segment length/speed)
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        combined = np.zeros(samples)
+        
+        # Generate clicks at regular intervals
+        t = 0
+        while t < duration:
+            click_pos = int(t * self.sample_rate)
+            if click_pos < samples:
+                # Each click is a short percussive sound - two-part for realism
+                # First part: sharp metallic click
+                click_duration = 0.02  # 20ms
+                click1 = self.generate_tone(1200, click_duration, amplitude * 0.8)
+                click1_envelope = np.exp(-50 * np.linspace(0, 1, len(click1)))
+                click1 = click1 * click1_envelope
+                
+                # Second part: lower resonance
+                click2 = self.generate_tone(450, click_duration * 1.5, amplitude * 0.5)
+                click2_envelope = np.exp(-30 * np.linspace(0, 1, len(click2)))
+                click2 = click2 * click2_envelope
+                
+                # Add both parts with slight offset
+                end_pos1 = min(click_pos + len(click1), samples)
+                combined[click_pos:end_pos1] += click1[:end_pos1 - click_pos]
+                
+                offset = int(0.005 * self.sample_rate)  # 5ms offset
+                click_pos2 = click_pos + offset
+                end_pos2 = min(click_pos2 + len(click2), samples)
+                if click_pos2 < samples:
+                    combined[click_pos2:end_pos2] += click2[:end_pos2 - click_pos2]
+            
+            # Add slight randomness to interval for realism
+            t += interval * random.uniform(0.95, 1.05)
+        
+        return combined
+    
+    def generate_brake_squeal(self, duration: float = 1.0, amplitude: float = 0.25) -> np.ndarray:
+        """
+        Generate brake squeal sound (high-frequency brake pad vibration).
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
+        
+        # High-frequency squeal from brake pad resonance
+        squeal_freq = random.uniform(2500, 4000)  # Typical brake squeal frequency
+        squeal = self.generate_tone(squeal_freq, duration, amplitude)
+        
+        # Add frequency modulation for realistic brake squeal character
+        modulation_freq = random.uniform(8, 15)  # Wobble in the squeal
+        freq_mod = 1 + 0.05 * np.sin(2 * np.pi * modulation_freq * t)
+        squeal = squeal * freq_mod
+        
+        # Add harmonics
+        harmonic2 = self.generate_tone(squeal_freq * 1.5, duration, amplitude * 0.3)
+        squeal[:len(harmonic2)] += harmonic2
+        
+        # Apply amplitude modulation (squeal often pulsates)
+        amp_modulation = 0.6 + 0.4 * np.abs(np.sin(2 * np.pi * 3 * t))
+        squeal = squeal * amp_modulation
+        
+        # Apply envelope
+        envelope = np.ones(samples)
+        fade_in = int(0.15 * self.sample_rate)
+        fade_out = int(0.2 * self.sample_rate)
+        envelope[:fade_in] = np.linspace(0, 1, fade_in)
+        envelope[-fade_out:] = np.linspace(1, 0, fade_out)
+        
+        return squeal * envelope
+    
+    def generate_low_speed_grinding(self, duration: float = 1.0, amplitude: float = 0.18) -> np.ndarray:
+        """
+        Generate low-speed wheel-rail grinding sound.
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
+        
+        # Low-frequency grinding from slow wheel rotation
+        grind1 = self.generate_sweep(150, 300, duration, amplitude * 0.5)
+        grind2 = self.generate_sweep(200, 400, duration, amplitude * 0.4)
+        
+        # Add roughness texture
+        roughness = self.generate_noise(duration, amplitude * 0.3, low_freq=100, high_freq=800)
+        
+        # Rhythmic component for wheel rotation at low speed
+        rotation_freq = 2.5  # ~2.5 Hz rotation at low speed
+        rotation_pattern = 1 + 0.3 * np.sin(2 * np.pi * rotation_freq * t)
+        
+        combined = np.zeros(samples)
+        combined[:len(grind1)] += grind1
+        combined[:len(grind2)] += grind2
+        combined[:len(roughness)] += roughness
+        combined = combined * rotation_pattern
+        
+        return combined
+    
+    def generate_wheel_slip(self, duration: float = 0.5, amplitude: float = 0.3) -> np.ndarray:
+        """
+        Generate wheel slip sound (momentary loss of traction).
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        
+        # High-pitched squealing from slipping wheel
+        slip_squeal = self.generate_sweep(800, 1500, duration, amplitude * 0.7)
+        
+        # Add rapid frequency modulation for spinning effect
+        t = np.linspace(0, duration, samples, False)
+        spin_mod = 1 + 0.15 * np.sin(2 * np.pi * 30 * t)  # Rapid modulation
+        slip_squeal = slip_squeal * spin_mod
+        
+        # Add some grinding noise
+        grinding = self.generate_noise(duration, amplitude * 0.4, low_freq=300, high_freq=1500)
+        
+        combined = np.zeros(samples)
+        combined[:len(slip_squeal)] += slip_squeal
+        combined[:len(grinding)] += grinding
+        
+        # Sharp attack and quick decay
+        envelope = np.exp(-3 * np.linspace(0, 1, samples))
+        
+        return combined * envelope
 
     def play_sound(self, audio: np.ndarray, blocking: bool = True):
         """
@@ -236,10 +432,15 @@ class MetroSoundSimulator:
         # Slight inverter noise (less prominent for smoother sound)
         inverter_noise = self.generate_noise(duration, amplitude=0.03, low_freq=4000, high_freq=7000)
         
-        # Add subtle wheel-rail contact sounds
+        # Add enhanced wheel-rail contact sounds
         rail_contact = self.generate_noise(duration, amplitude=0.06, low_freq=800, high_freq=2000)
         
+        # Add rail joint clicks (clickety-clack) - speed-dependent interval
+        speed_factor = random.uniform(0.7, 1.0)  # Simulates different speeds
+        rail_clicks = self.generate_rail_joint_clicks(duration, interval=0.8 * speed_factor, amplitude=0.12)
+        
         combined = rumble + motor_hum + motor_hum2 + inverter_noise + rail_contact
+        combined[:len(rail_clicks)] += rail_clicks
         
         # Apply gentle fade in/out for smoother transitions
         fade_samples = int(0.5 * self.sample_rate)  # 500ms fade
@@ -289,7 +490,25 @@ class MetroSoundSimulator:
         # Wheel-rail contact change (mild)
         rail_sound = self.generate_sweep(700, 850, duration, amplitude=0.08)
         
-        combined = motor_sweep + rumble + rail_sound
+        # Add subtle wheel flange contact sound (not full squeal, just light contact)
+        flange_contact = self.generate_noise(duration, amplitude=0.06, low_freq=900, high_freq=1500)
+        
+        # Sometimes add a light flange squeal for tighter curves (30% chance)
+        if random.random() < 0.3:
+            squeal_duration = duration * 0.6  # Squeal for part of the curve
+            flange_squeal = self.generate_wheel_flange_squeal(squeal_duration, amplitude=0.18)
+            # Position squeal in middle of curve
+            squeal_start = int((duration - squeal_duration) * 0.5 * self.sample_rate)
+            
+        combined = motor_sweep + rumble + rail_sound + flange_contact
+        
+        # Add squeal if generated
+        if random.random() < 0.3:
+            squeal_duration = duration * 0.6
+            flange_squeal = self.generate_wheel_flange_squeal(squeal_duration, amplitude=0.18)
+            squeal_start = int((duration - squeal_duration) * 0.5 * self.sample_rate)
+            squeal_end = min(squeal_start + len(flange_squeal), len(combined))
+            combined[squeal_start:squeal_end] += flange_squeal[:squeal_end - squeal_start]
         
         # Smooth envelope
         samples = len(combined)
@@ -393,6 +612,17 @@ class MetroSoundSimulator:
         track_noise = self.generate_noise(duration, amplitude=0.07, low_freq=200, high_freq=1500)
         track_noise = track_noise * rumble_envelope
         
+        # Add low-speed grinding at the start
+        grind_duration = min(1.0, duration * 0.35)
+        low_speed_grind = self.generate_low_speed_grinding(grind_duration, amplitude=0.15)
+        
+        # Occasionally add wheel slip during heavy acceleration (20% chance)
+        add_slip = random.random() < 0.2
+        if add_slip:
+            slip_time = random.uniform(0.3, 0.8)  # Slip occurs early in acceleration
+            slip_pos = int(slip_time * self.sample_rate)
+            wheel_slip = self.generate_wheel_slip(0.5, amplitude=0.25)
+        
         # Combine all sounds
         combined = np.zeros(samples)
         combined += base_rumble[:samples]
@@ -400,6 +630,12 @@ class MetroSoundSimulator:
         combined += motor_harmonic[:samples]
         combined[:len(inverter)] += inverter
         combined += track_noise[:samples]
+        combined[:len(low_speed_grind)] += low_speed_grind
+        
+        # Add wheel slip if triggered
+        if add_slip and slip_pos < samples:
+            slip_end = min(slip_pos + len(wheel_slip), samples)
+            combined[slip_pos:slip_end] += wheel_slip[:slip_end - slip_pos]
         
         # Smooth fade in at start
         fade_in_samples = int(0.3 * self.sample_rate)
@@ -436,7 +672,7 @@ class MetroSoundSimulator:
         brake_duration = duration * 0.7
         air_brake = self.generate_compressed_air_release(brake_duration, amplitude=0.18)
         
-        # Brake pad friction sound - increases as brakes are applied
+        # Enhanced brake pad friction sound - increases as brakes are applied
         friction_sound = self.generate_noise(duration, amplitude=0.09, low_freq=100, high_freq=400)
         friction_envelope = np.clip((t / duration) * 1.5, 0.2, 1.0)
         friction_sound = friction_sound * friction_envelope
@@ -444,6 +680,18 @@ class MetroSoundSimulator:
         # Track noise decreasing with speed
         track_noise = self.generate_noise(duration, amplitude=0.06, low_freq=300, high_freq=1200)
         track_noise = track_noise * decel_envelope
+        
+        # Add low-speed grinding at the end
+        grind_start = duration * 0.7  # Grinding becomes more audible at low speed
+        grind_duration = duration * 0.3
+        low_speed_grind = self.generate_low_speed_grinding(grind_duration, amplitude=0.14)
+        
+        # Occasionally add brake squeal (25% chance)
+        add_squeal = random.random() < 0.25
+        if add_squeal:
+            squeal_start_time = random.uniform(0.3, 0.6)  # Squeal occurs mid-braking
+            squeal_pos = int(squeal_start_time * self.sample_rate)
+            brake_squeal_sound = self.generate_brake_squeal(1.0, amplitude=0.20)
         
         # Combine all sounds
         combined = np.zeros(samples)
@@ -457,6 +705,16 @@ class MetroSoundSimulator:
         
         combined += friction_sound[:samples]
         combined += track_noise[:samples]
+        
+        # Add low-speed grinding at the end
+        grind_start_sample = int(grind_start * self.sample_rate)
+        grind_end = min(grind_start_sample + len(low_speed_grind), samples)
+        combined[grind_start_sample:grind_end] += low_speed_grind[:grind_end - grind_start_sample]
+        
+        # Add brake squeal if triggered
+        if add_squeal and squeal_pos < samples:
+            squeal_end = min(squeal_pos + len(brake_squeal_sound), samples)
+            combined[squeal_pos:squeal_end] += brake_squeal_sound[:squeal_end - squeal_pos]
         
         # Smooth fade out at end
         fade_out_samples = int(0.5 * self.sample_rate)

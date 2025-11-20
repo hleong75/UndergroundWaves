@@ -181,6 +181,104 @@ def test_inverter_generation():
     print("  ✓ Inverter generation test passed")
 
 
+def test_wheel_flange_squeal_generation():
+    """Test wheel flange squeal sound generation."""
+    print("Testing wheel flange squeal generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test flange squeal
+    squeal_sound = simulator.generate_wheel_flange_squeal(1.5, amplitude=0.35)
+    
+    # Check correct duration
+    expected_samples = int(44100 * 1.5)
+    assert len(squeal_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(squeal_sound)}"
+    
+    # Check non-zero output
+    assert np.max(np.abs(squeal_sound)) > 0.01, "Flange squeal should be audible"
+    
+    # Check envelope (should fade in/out)
+    assert abs(squeal_sound[0]) < 0.05, "Squeal should start near 0"
+    assert abs(squeal_sound[-1]) < 0.05, "Squeal should end near 0"
+    
+    print("  ✓ Wheel flange squeal generation test passed")
+
+
+def test_rail_joint_clicks_generation():
+    """Test rail joint clicking sound generation."""
+    print("Testing rail joint clicks generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test rail joint clicks
+    clicks_sound = simulator.generate_rail_joint_clicks(2.0, interval=0.8, amplitude=0.15)
+    
+    # Check correct duration
+    expected_samples = int(44100 * 2.0)
+    assert len(clicks_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(clicks_sound)}"
+    
+    # Check it's not silent
+    assert np.max(np.abs(clicks_sound)) > 0.01, "Rail clicks should be audible"
+    
+    print("  ✓ Rail joint clicks generation test passed")
+
+
+def test_brake_squeal_generation():
+    """Test brake squeal sound generation."""
+    print("Testing brake squeal generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test brake squeal
+    squeal_sound = simulator.generate_brake_squeal(1.0, amplitude=0.25)
+    
+    # Check correct duration
+    expected_samples = 44100
+    assert len(squeal_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(squeal_sound)}"
+    
+    # Check non-zero output
+    assert np.max(np.abs(squeal_sound)) > 0.01, "Brake squeal should be audible"
+    
+    print("  ✓ Brake squeal generation test passed")
+
+
+def test_low_speed_grinding_generation():
+    """Test low-speed grinding sound generation."""
+    print("Testing low-speed grinding generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test low-speed grinding
+    grind_sound = simulator.generate_low_speed_grinding(1.0, amplitude=0.18)
+    
+    # Check correct duration
+    expected_samples = 44100
+    assert len(grind_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(grind_sound)}"
+    
+    # Check non-zero output
+    assert np.max(np.abs(grind_sound)) > 0.01, "Grinding should be audible"
+    
+    print("  ✓ Low-speed grinding generation test passed")
+
+
+def test_wheel_slip_generation():
+    """Test wheel slip sound generation."""
+    print("Testing wheel slip generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test wheel slip
+    slip_sound = simulator.generate_wheel_slip(0.5, amplitude=0.3)
+    
+    # Check samples generated
+    assert len(slip_sound) > 0, "Wheel slip should produce audio samples"
+    
+    # Check non-zero output
+    assert np.max(np.abs(slip_sound)) > 0.01, "Wheel slip should be audible"
+    
+    # Check envelope (should have exponential decay)
+    first_quarter = np.mean(np.abs(slip_sound[:len(slip_sound)//4]))
+    last_quarter = np.mean(np.abs(slip_sound[-len(slip_sound)//4:]))
+    assert first_quarter > last_quarter, "Wheel slip should decay over time"
+    
+    print("  ✓ Wheel slip generation test passed")
+
+
 def run_all_tests():
     """Run all tests and report results."""
     print("\n" + "="*60)
@@ -198,6 +296,11 @@ def run_all_tests():
         test_compressed_air_generation,
         test_electric_motor_generation,
         test_inverter_generation,
+        test_wheel_flange_squeal_generation,
+        test_rail_joint_clicks_generation,
+        test_brake_squeal_generation,
+        test_low_speed_grinding_generation,
+        test_wheel_slip_generation,
     ]
     
     passed = 0
