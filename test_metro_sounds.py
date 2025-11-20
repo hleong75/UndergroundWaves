@@ -279,6 +279,46 @@ def test_wheel_slip_generation():
     print("  ✓ Wheel slip generation test passed")
 
 
+def test_rail_switch_generation():
+    """Test rail switch (aiguillage) sound generation."""
+    print("Testing rail switch generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test rail switch sound
+    switch_sound = simulator.generate_rail_switch(1.2, amplitude=0.25)
+    
+    # Check correct duration
+    expected_samples = int(44100 * 1.2)
+    assert len(switch_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(switch_sound)}"
+    
+    # Check non-zero output
+    assert np.max(np.abs(switch_sound)) > 0.01, "Rail switch should be audible"
+    
+    # Check it's not silent
+    assert np.std(switch_sound) > 0, "Rail switch should not be silent"
+    
+    print("  ✓ Rail switch generation test passed")
+
+
+def test_rail_defects_generation():
+    """Test rail defects sound generation."""
+    print("Testing rail defects generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test rail defects sound multiple times to cover different defect types
+    for _ in range(5):
+        defect_sound = simulator.generate_rail_defects(0.8, amplitude=0.2)
+        
+        # Check correct duration
+        expected_samples = int(44100 * 0.8)
+        assert len(defect_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(defect_sound)}"
+        
+        # Check non-zero output
+        assert np.max(np.abs(defect_sound)) > 0.005, "Rail defects should be audible"
+    
+    print("  ✓ Rail defects generation test passed")
+
+
 def run_all_tests():
     """Run all tests and report results."""
     print("\n" + "="*60)
@@ -301,6 +341,8 @@ def run_all_tests():
         test_brake_squeal_generation,
         test_low_speed_grinding_generation,
         test_wheel_slip_generation,
+        test_rail_switch_generation,
+        test_rail_defects_generation,
     ]
     
     passed = 0

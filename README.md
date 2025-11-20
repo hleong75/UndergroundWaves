@@ -10,6 +10,7 @@ A realistic metro/subway sound simulator that generates authentic, continuous un
 - **⚡ Gradual Acceleration/Deceleration**: Progressive power delivery and braking that mimics real electric trains
 - **🎵 Multi-layered Ambient Sounds**: Continuous motor hum, track vibrations, wheel-rail contact, and inverter noise
 - **🛤️ Realistic Wheel-Rail Friction**: Rail joint clicks (clickety-clack), wheel flange squeal on curves, brake squeal, low-speed grinding, and occasional wheel slip
+- **🔀 Rail Switches & Defects**: Authentic aiguillage (rail switch) crossing sounds and various rail defects including corrugation, flat spots, worn joints, and track irregularities
 - **💨 Regenerative + Air Braking**: Realistic combined braking system with gradual engagement
 - **🔧 Electric System Idle**: Authentic compressor cycling, cooling fans, and auxiliary systems at stations
 - **🌊 Smooth Transitions**: All sounds fade in/out naturally to eliminate abrupt changes
@@ -73,11 +74,14 @@ The simulator uses:
   - Multi-frequency squeals for wheel flange contact and brake squeal
   - Low-frequency grinding for wheel-rail friction at low speeds
   - Rapid modulation for wheel slip effects
+  - Complex impact patterns for rail switches (aiguillages)
+  - Various rail defect simulations (corrugation, flat spots, worn joints, irregularities)
 
 All sounds are generated in real-time using mathematical models inspired by actual metro/subway acoustics, specifically modeling:
 - **Compressed air systems** (doors and brakes)
 - **Electric traction motors** with characteristic frequency sweeps
 - **Power electronics** (IGBT/PWM inverters at 4-8 kHz)
+- **Rail infrastructure** (switches, joints, and track defects)
 
 ## Examples
 

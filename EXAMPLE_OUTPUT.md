@@ -122,6 +122,22 @@ The simulator creates a **continuous journey** with these authentic metro sounds
 - Smooth fade in/out transitions
 - Duration: 10-18 seconds per segment
 
+### 🛤️ Rail Switches (Aiguillages)
+- Authentic rail switch/points crossing sounds (15% chance during cruising)
+- Multiple sharp metallic clicks as wheels hit gaps and frogs (1800-2400 Hz)
+- Clunking sounds from switch mechanism (270-280 Hz)
+- Rhythmic pattern as front bogie crosses, then rear bogie (0.4-0.5s delay)
+- Brief rumble increase and switch rattling during crossing
+- Duration: ~1.2 seconds
+
+### ⚠️ Rail Defects
+- Various rail imperfections randomly occurring (12% chance during cruising)
+- **Corrugation**: Rhythmic thumping at 8-15 Hz from rippled rail surface
+- **Flat Spots**: Periodic loud impacts from wheel damage (wheel revolution intervals)
+- **Worn Joints**: Harsh metallic clangs with heavy bass thump and prolonged ringing
+- **Track Irregularities**: Random unpredictable bumps of varying intensity
+- Duration: ~0.8 seconds
+
 ### 🔄 Gentle Curves
 - Subtle motor frequency changes (500-600 Hz)
 - Slightly increased rumble
