@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from collections import deque
 
 # Constants
-KMH_TO_MS = 3.6  # Conversion factor from km/h to m/s
+KMH_TO_MS_DIVISOR = 3.6  # Divisor to convert km/h to m/s (1 km/h = 1000m/3600s = 1/3.6 m/s)
 
 
 @dataclass
@@ -63,7 +63,8 @@ class AIParameterLearner:
             model['mean'] = (1 - self.learning_rate) * model['mean'] + self.learning_rate * new_mean
             model['std'] = (1 - self.learning_rate) * model['std'] + self.learning_rate * new_std
             
-            # Calculate trend (safe division as we know history_len > 10 > 1)
+            # Calculate trend - rate of change per sample
+            # Using history_len for averaging (safe as history_len > 10)
             model['trend'] = (values[-1] - values[0]) / history_len
     
     def predict_parameter(self, param_name: str, context: Optional[SoundContext] = None) -> float:
@@ -175,7 +176,7 @@ class IntelligentNoiseGenerator:
             
             # Speed-dependent periodic variation (wheel rotation)
             wheel_circumference = 0.8  # meters
-            rotation_freq = context.speed / KMH_TO_MS / wheel_circumference  # Hz
+            rotation_freq = context.speed / KMH_TO_MS_DIVISOR / wheel_circumference  # Hz
             
             if rotation_freq > 0:
                 periodic = 0.02 * np.sin(2 * np.pi * rotation_freq * t)

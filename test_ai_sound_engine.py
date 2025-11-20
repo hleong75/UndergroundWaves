@@ -102,8 +102,13 @@ def test_context_aware_frequency_modulator():
     # Test harmonic generation
     harmonics = modulator.get_harmonic_intelligence(440.0, 'motor', context)
     assert len(harmonics) > 0
-    assert all(isinstance(h[0], (float, np.floating)) for h in harmonics)
-    assert all(isinstance(h[1], (float, np.floating)) for h in harmonics)
+    # Verify tuple structure: (frequency, amplitude)
+    assert all(
+        isinstance(h, tuple) and len(h) == 2 and 
+        isinstance(h[0], (float, np.floating)) and 
+        isinstance(h[1], (float, np.floating)) 
+        for h in harmonics
+    )
     
     # Check that harmonics have decreasing amplitudes (generally)
     amplitudes = [h[1] for h in harmonics]
