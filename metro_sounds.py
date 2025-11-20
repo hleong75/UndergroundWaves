@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 Metro Sound Simulator - Simulates realistic metro/subway sounds
+Simulateur de bruits de métro - Simule des sons réalistes de métro/souterrain
+
 Includes random events like turns with screeching and door closures.
+Comprend des événements aléatoires comme des virages avec grincements et des fermetures de portes.
 """
 
 import numpy as np
