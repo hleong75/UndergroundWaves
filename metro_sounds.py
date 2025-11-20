@@ -602,8 +602,12 @@ class MetroSoundSimulator:
             # Random track irregularities cause unpredictable bumps
             num_bumps = random.randint(3, 8)
             
+            # Place bumps away from edges to avoid fade-out issues
+            safe_start = 0.15  # Start after 150ms
+            safe_end = duration - 0.15  # End before last 150ms
+            
             for i in range(num_bumps):
-                bump_time = random.uniform(0, duration)
+                bump_time = random.uniform(safe_start, safe_end)
                 bump_pos = int(bump_time * self.sample_rate)
                 
                 if bump_pos < samples:
@@ -612,15 +616,15 @@ class MetroSoundSimulator:
                     
                     if bump_type == 'small':
                         bump_duration = 0.02
-                        bump_amp = amplitude * 0.4
+                        bump_amp = amplitude * 0.5
                         bump_freq = random.uniform(300, 600)
                     elif bump_type == 'medium':
                         bump_duration = 0.035
-                        bump_amp = amplitude * 0.6
+                        bump_amp = amplitude * 0.7
                         bump_freq = random.uniform(200, 500)
                     else:  # large
                         bump_duration = 0.05
-                        bump_amp = amplitude * 0.8
+                        bump_amp = amplitude * 0.9
                         bump_freq = random.uniform(150, 400)
                     
                     bump = self.generate_tone(bump_freq, bump_duration, bump_amp)
@@ -628,20 +632,35 @@ class MetroSoundSimulator:
                     bump = bump * bump_envelope
                     
                     # Add noise component for roughness
-                    noise = self.generate_noise(bump_duration, bump_amp * 0.5, low_freq=200, high_freq=1000)
+                    noise = self.generate_noise(bump_duration, bump_amp * 0.6, low_freq=200, high_freq=1000)
                     bump = bump + noise[:len(bump)]
                     
                     end_pos = min(bump_pos + len(bump), samples)
                     combined[bump_pos:end_pos] += bump[:end_pos - bump_pos]
         
-        # Apply overall envelope
-        envelope = np.ones(samples)
-        fade_samples = int(0.1 * self.sample_rate)
-        if samples > 2 * fade_samples:
-            envelope[:fade_samples] = np.linspace(0, 1, fade_samples)
-            envelope[-fade_samples:] = np.linspace(1, 0, fade_samples)
-        
-        return combined * envelope
+        # Apply overall envelope only if there's content
+        # Check if we have actual sound content
+        if np.max(np.abs(combined)) > 0.001:
+            envelope = np.ones(samples)
+            fade_samples = int(0.1 * self.sample_rate)
+            if samples > 2 * fade_samples:
+                envelope[:fade_samples] = np.linspace(0.3, 1, fade_samples)
+                envelope[-fade_samples:] = np.linspace(1, 0.3, fade_samples)
+            
+            return combined * envelope
+        else:
+            # If no content was generated, return a minimal defect sound
+            # to ensure we always have some output
+            default_bump = self.generate_tone(250, 0.03, amplitude * 0.7)
+            default_bump_env = np.exp(-50 * np.linspace(0, 1, len(default_bump)))
+            default_bump = default_bump * default_bump_env
+            
+            # Place in middle
+            mid_pos = samples // 2
+            end_pos = min(mid_pos + len(default_bump), samples)
+            combined[mid_pos:end_pos] += default_bump[:end_pos - mid_pos]
+            
+            return combined
 
     def play_sound(self, audio: np.ndarray, blocking: bool = True):
         """
