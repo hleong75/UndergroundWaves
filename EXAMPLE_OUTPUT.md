@@ -114,7 +114,8 @@ The simulator creates a **continuous journey** with these authentic metro sounds
 ### 🚇⚡ Continuous Cruising (Electric Train)
 - Low frequency rumbling (40-150 Hz) from wheels
 - Multi-layered electric motor hum (450-550 Hz + harmonics)
-- Wheel-rail contact sounds (800-2000 Hz)
+- Enhanced wheel-rail contact sounds (800-2000 Hz)
+- **Rhythmic rail joint clicks** (clickety-clack pattern at speed-dependent intervals)
 - Inverter background noise (4-7 kHz)
 - Periodic track vibrations at ~3 Hz and ~8 Hz
 - Natural random variations for realism
@@ -124,8 +125,9 @@ The simulator creates a **continuous journey** with these authentic metro sounds
 ### 🔄 Gentle Curves
 - Subtle motor frequency changes (500-600 Hz)
 - Slightly increased rumble
-- Mild wheel-rail contact variations
-- No harsh screeching - realistic curve negotiation
+- Enhanced wheel-rail contact variations with flange contact noise (900-1500 Hz)
+- **Occasional wheel flange squeal** (30% chance) - multi-frequency metallic squealing with pulsing modulation
+- No harsh emergency screeching - realistic curve negotiation
 - Duration: 2.5-4 seconds
 
 ### 🚪💨 Smooth Door Operations (Compressed Air System)
@@ -143,6 +145,8 @@ The simulator creates a **continuous journey** with these authentic metro sounds
 - Electric traction motor whine (250-850 Hz sweep)
 - Motor load harmonics (500-1700 Hz)
 - Power inverter startup surge (PWM at 4-6 kHz with decay)
+- **Low-speed grinding** sounds from wheels (150-400 Hz) at start
+- **Occasional wheel slip** (20% chance) - rapid frequency modulation and grinding
 - Track noise increasing with speed
 - Base rumble growing from quiet to full
 - Smooth fade-in at start
@@ -153,7 +157,9 @@ The simulator creates a **continuous journey** with these authentic metro sounds
 - Electric regen braking (850-200 Hz sweep)
 - Motor harmonics fading (1700-400 Hz)
 - Delayed air brake engagement (starts 20% into decel)
-- Brake pad friction increasing progressively (100-400 Hz)
+- Enhanced brake pad friction increasing progressively (100-400 Hz)
+- **Occasional brake squeal** (25% chance) - high-frequency resonance (2500-4000 Hz) with wobble modulation
+- **Low-speed grinding** at end (150-400 Hz with roughness texture)
 - Track noise decreasing with speed
 - Smooth fade-out at end
 - Duration: ~3.5 seconds (adjustable)
