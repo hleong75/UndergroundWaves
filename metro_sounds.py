@@ -204,34 +204,56 @@ class MetroSoundSimulator:
     
     def ambient_rumble(self, duration: float = 3.0):
         """
-        Generate and play ambient metro rumble with electric motor background.
+        Generate and play continuous ambient metro rumble with electric motor background.
         
         Args:
             duration: Duration in seconds
         """
-        print("  🚇⚡ Rumbling along the tracks (electric motors)...")
+        print("  🚇⚡ Cruising smoothly (continuous motor hum)...")
         # Low frequency rumble with some variation
-        rumble = self.generate_noise(duration, amplitude=0.15, low_freq=40, high_freq=150)
+        rumble = self.generate_noise(duration, amplitude=0.12, low_freq=40, high_freq=150)
         
-        # Add some periodic vibration
-        vibration_freq = 8  # Hz
+        # Add multiple periodic vibrations for realism
         t = np.linspace(0, duration, len(rumble), False)
-        vibration = 0.05 * np.sin(2 * np.pi * vibration_freq * t)
-        rumble = rumble * (1 + vibration)
         
-        # Add constant electric motor hum in background
-        motor_freq = random.uniform(400, 600)
-        motor_hum = self.generate_tone(motor_freq, duration, amplitude=0.06)
+        # Primary track vibration at ~8 Hz
+        vibration1 = 0.04 * np.sin(2 * np.pi * 8 * t)
+        # Secondary harmonic at ~3 Hz for wheel rhythm
+        vibration2 = 0.03 * np.sin(2 * np.pi * 3 * t)
+        # Add slight random variation to simulate real track irregularities
+        variation = 1 + vibration1 + vibration2 + 0.02 * np.random.uniform(-1, 1, len(t))
         
-        # Slight inverter noise
-        inverter_noise = self.generate_noise(duration, amplitude=0.04, low_freq=4000, high_freq=7000)
+        rumble = rumble * variation
         
-        combined = rumble + motor_hum + inverter_noise
+        # Add constant electric motor hum in background (more stable frequency)
+        motor_freq = random.uniform(450, 550)
+        motor_hum = self.generate_tone(motor_freq, duration, amplitude=0.08)
+        
+        # Add second harmonic for richer motor sound
+        motor_freq2 = motor_freq * 1.5
+        motor_hum2 = self.generate_tone(motor_freq2, duration, amplitude=0.04)
+        
+        # Slight inverter noise (less prominent for smoother sound)
+        inverter_noise = self.generate_noise(duration, amplitude=0.03, low_freq=4000, high_freq=7000)
+        
+        # Add subtle wheel-rail contact sounds
+        rail_contact = self.generate_noise(duration, amplitude=0.06, low_freq=800, high_freq=2000)
+        
+        combined = rumble + motor_hum + motor_hum2 + inverter_noise + rail_contact
+        
+        # Apply gentle fade in/out for smoother transitions
+        fade_samples = int(0.5 * self.sample_rate)  # 500ms fade
+        if len(combined) > 2 * fade_samples:
+            fade_in = np.linspace(0.7, 1.0, fade_samples)
+            fade_out = np.linspace(1.0, 0.7, fade_samples)
+            combined[:fade_samples] *= fade_in
+            combined[-fade_samples:] *= fade_out
+        
         self.play_sound(combined, blocking=False)
         time.sleep(duration)
     
     def turn_screech(self):
-        """Generate and play a turn screeching sound."""
+        """Generate and play a turn screeching sound (kept for backward compatibility)."""
         print("  🔊 SCREEEECH! Taking a sharp turn...")
         duration = random.uniform(1.5, 3.0)
         
@@ -254,183 +276,344 @@ class MetroSoundSimulator:
         
         self.play_sound(combined, blocking=True)
     
-    def door_closing(self):
-        """Generate and play door closing sequence with compressed air system."""
-        print("  🚪 Doors closing! Beep beep beep...")
+    def gentle_curve(self, duration: float = 2.5):
+        """Generate a gentle curve sound without harsh screeching."""
+        print("  🔄 Taking a gentle curve...")
         
-        # Warning beeps
+        # Subtle pitch change in motor
+        motor_sweep = self.generate_sweep(500, 600, duration, amplitude=0.10)
+        
+        # Slight increase in rumble
+        rumble = self.generate_noise(duration, amplitude=0.13, low_freq=40, high_freq=180)
+        
+        # Wheel-rail contact change (mild)
+        rail_sound = self.generate_sweep(700, 850, duration, amplitude=0.08)
+        
+        combined = motor_sweep + rumble + rail_sound
+        
+        # Smooth envelope
+        samples = len(combined)
+        envelope = np.ones(samples)
+        fade_len = int(0.3 * self.sample_rate)
+        envelope[:fade_len] = np.linspace(0.8, 1.0, fade_len)
+        envelope[-fade_len:] = np.linspace(1.0, 0.8, fade_len)
+        combined = combined * envelope
+        
+        self.play_sound(combined, blocking=False)
+        time.sleep(duration)
+    
+    def door_closing(self):
+        """Generate and play realistic door closing sequence with compressed air system."""
+        print("  🚪 Doors closing (warning chime)...")
+        
+        # Warning chime - more melodic and less harsh
         beep_freq = 800
         for i in range(3):
-            beep = self.generate_tone(beep_freq, 0.2, amplitude=0.25)
+            beep = self.generate_tone(beep_freq, 0.18, amplitude=0.22)
+            # Add slight fade to beeps
+            fade = np.linspace(1.0, 0.3, len(beep))
+            beep = beep * fade
             self.play_sound(beep, blocking=True)
-            time.sleep(0.15)
+            time.sleep(0.12)
         
-        time.sleep(0.3)
+        time.sleep(0.25)
         
         # Compressed air system activation and door movement
-        print("  💨 *PSSSHHHH* (compressed air) *WHIRRRR* *THUNK*")
+        print("  💨 Air system engaging - doors closing smoothly...")
         
-        # Initial air pressure release as doors unlock
-        air_release = self.generate_compressed_air_release(0.4, amplitude=0.22)
+        # Initial air pressure release as doors unlock (softer)
+        air_release = self.generate_compressed_air_release(0.35, amplitude=0.20)
         self.play_sound(air_release, blocking=True)
         
-        # Door motor sound during closing
-        time.sleep(0.1)
-        door_motor = self.generate_sweep(200, 150, 0.8, amplitude=0.15)
+        # Door motor sound during closing - smoother operation
+        time.sleep(0.08)
+        door_motor = self.generate_sweep(210, 145, 1.0, amplitude=0.13)
         
-        # Continuous air hiss during movement
-        hiss = self.generate_noise(0.8, amplitude=0.15, low_freq=2000, high_freq=7000)
-        door_sound = door_motor + hiss[:len(door_motor)]
+        # Continuous air hiss during movement (quieter, more controlled)
+        hiss = self.generate_noise(1.0, amplitude=0.12, low_freq=2000, high_freq=6500)
+        
+        # Add door mechanism sounds
+        mechanism = self.generate_noise(1.0, amplitude=0.08, low_freq=150, high_freq=400)
+        
+        door_sound = door_motor + hiss[:len(door_motor)] + mechanism[:len(door_motor)]
+        
+        # Apply envelope for smooth operation
+        envelope = np.ones(len(door_sound))
+        fade_in = int(0.1 * self.sample_rate)
+        fade_out = int(0.15 * self.sample_rate)
+        envelope[:fade_in] = np.linspace(0.3, 1.0, fade_in)
+        envelope[-fade_out:] = np.linspace(1.0, 0.5, fade_out)
+        door_sound = door_sound * envelope
+        
         self.play_sound(door_sound, blocking=True)
         
-        # Final air pressure equalization and door slam
-        time.sleep(0.1)
-        final_air = self.generate_compressed_air_release(0.5, amplitude=0.18)
-        thunk = self.generate_tone(150, 0.15, amplitude=0.4)
-        combined = np.concatenate([final_air, thunk])
+        # Final air pressure equalization and gentle door seal
+        time.sleep(0.08)
+        final_air = self.generate_compressed_air_release(0.4, amplitude=0.15)
+        # Softer thunk - sealed, not slammed
+        thunk = self.generate_tone(145, 0.12, amplitude=0.30)
+        thunk_envelope = np.exp(-10 * np.linspace(0, 1, len(thunk)))
+        thunk = thunk * thunk_envelope
         
+        combined = np.concatenate([final_air, thunk])
         self.play_sound(combined, blocking=True)
     
     def acceleration(self, duration: float = 3.0):
         """
-        Simulate electric metro accelerating with traction motor sounds.
+        Simulate gradual, realistic electric metro acceleration with smooth power delivery.
         
         Args:
             duration: Duration in seconds
         """
-        print("  🚀⚡ Accelerating (electric motor whine)...")
-        # Base rumble from wheels
-        base_rumble = self.generate_noise(duration, amplitude=0.10)
+        print("  🚀⚡ Smoothly accelerating (electric traction motors)...")
+        # Base rumble from wheels - starts quiet, gets louder
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
         
-        # Electric traction motor whine (characteristic of electric trains)
-        motor_whine = self.generate_electric_motor_whine(duration, 300, 900, amplitude=0.18)
+        # Gradual amplitude increase for rumble
+        rumble_envelope = np.clip(t / duration, 0.3, 1.0)
+        base_rumble = self.generate_noise(duration, amplitude=0.11)
+        base_rumble = base_rumble * rumble_envelope
         
-        # Power inverter sound at startup
-        inverter = self.generate_inverter_sound(duration * 0.3, amplitude=0.12)
+        # Electric traction motor whine with gradual power increase
+        # Start from idle, ramp up to cruising speed
+        motor_whine = self.generate_electric_motor_whine(duration, 250, 850, amplitude=0.16)
+        
+        # Add progressive motor load (more harmonics as speed increases)
+        motor_harmonic = self.generate_sweep(500, 1700, duration, amplitude=0.06)
+        motor_harmonic = motor_harmonic * rumble_envelope
+        
+        # Power inverter sound - stronger at beginning (startup surge)
+        inverter_duration = duration * 0.5
+        inverter = self.generate_inverter_sound(inverter_duration, amplitude=0.10)
+        inverter_envelope = np.exp(-2 * np.linspace(0, 1, len(inverter)))
+        inverter = inverter * inverter_envelope
+        
+        # Add track sounds that increase with speed
+        track_noise = self.generate_noise(duration, amplitude=0.07, low_freq=200, high_freq=1500)
+        track_noise = track_noise * rumble_envelope
         
         # Combine all sounds
-        samples = int(self.sample_rate * duration)
         combined = np.zeros(samples)
         combined += base_rumble[:samples]
         combined += motor_whine[:samples]
+        combined += motor_harmonic[:samples]
         combined[:len(inverter)] += inverter
+        combined += track_noise[:samples]
+        
+        # Smooth fade in at start
+        fade_in_samples = int(0.3 * self.sample_rate)
+        combined[:fade_in_samples] *= np.linspace(0.5, 1.0, fade_in_samples)
         
         self.play_sound(combined, blocking=False)
         time.sleep(duration)
     
     def deceleration(self, duration: float = 2.5):
         """
-        Simulate metro decelerating with electric regenerative braking and air brakes.
+        Simulate gradual, realistic metro deceleration with regenerative braking and air brakes.
         
         Args:
             duration: Duration in seconds
         """
-        print("  🛑💨 Slowing down (air brakes + regen braking)...")
-        # Base rumble
-        decel_rumble = self.generate_noise(duration, amplitude=0.12)
+        print("  🛑💨 Gradually slowing down (regenerative + air brakes)...")
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
         
-        # Electric motor regenerative braking (falling pitch)
-        motor_whine = self.generate_electric_motor_whine(duration, 800, 250, amplitude=0.15)
+        # Gradual amplitude decrease for rumble as speed decreases
+        decel_envelope = np.clip(1.0 - (t / duration) * 0.7, 0.3, 1.0)
+        decel_rumble = self.generate_noise(duration, amplitude=0.13)
+        decel_rumble = decel_rumble * decel_envelope
         
-        # Air brake engagement sound (compressed air)
-        brake_duration = duration * 0.6
-        air_brake = self.generate_compressed_air_release(brake_duration, amplitude=0.20)
+        # Electric motor regenerative braking (falling pitch) - smooth power curve
+        motor_whine = self.generate_electric_motor_whine(duration, 850, 200, amplitude=0.14)
         
-        # Brake pad friction sound (low frequency rumble with some harmonics)
-        friction_sound = self.generate_noise(duration, amplitude=0.10, low_freq=100, high_freq=400)
+        # Add motor harmonics that fade out
+        motor_harmonic = self.generate_sweep(1700, 400, duration, amplitude=0.05)
+        motor_harmonic = motor_harmonic * decel_envelope
+        
+        # Air brake engagement sound - gradual application
+        brake_start = duration * 0.2  # Brakes engage 20% into deceleration
+        brake_duration = duration * 0.7
+        air_brake = self.generate_compressed_air_release(brake_duration, amplitude=0.18)
+        
+        # Brake pad friction sound - increases as brakes are applied
+        friction_sound = self.generate_noise(duration, amplitude=0.09, low_freq=100, high_freq=400)
+        friction_envelope = np.clip((t / duration) * 1.5, 0.2, 1.0)
+        friction_sound = friction_sound * friction_envelope
+        
+        # Track noise decreasing with speed
+        track_noise = self.generate_noise(duration, amplitude=0.06, low_freq=300, high_freq=1200)
+        track_noise = track_noise * decel_envelope
         
         # Combine all sounds
-        samples = int(self.sample_rate * duration)
         combined = np.zeros(samples)
         combined += decel_rumble[:samples]
         combined += motor_whine[:samples]
-        combined[:len(air_brake)] += air_brake
+        combined += motor_harmonic[:samples]
+        
+        # Add air brake starting partway through
+        brake_start_sample = int(brake_start * self.sample_rate)
+        combined[brake_start_sample:brake_start_sample+len(air_brake)] += air_brake
+        
         combined += friction_sound[:samples]
+        combined += track_noise[:samples]
+        
+        # Smooth fade out at end
+        fade_out_samples = int(0.5 * self.sample_rate)
+        combined[-fade_out_samples:] *= np.linspace(1.0, 0.3, fade_out_samples)
         
         self.play_sound(combined, blocking=False)
         time.sleep(duration)
     
     def electric_idle(self, duration: float = 1.0):
         """
-        Generate electric system idle sound when stopped at station.
+        Generate realistic electric system idle sound when stopped at station.
         
         Args:
             duration: Duration in seconds
         """
-        # Compressor and auxiliary systems humming
-        aux_hum = self.generate_tone(120, duration, amplitude=0.08)  # 120 Hz hum
+        samples = int(self.sample_rate * duration)
+        t = np.linspace(0, duration, samples, False)
         
-        # Air compressor cycling
-        compressor = self.generate_tone(180, duration, amplitude=0.06)
+        # Main power supply hum (50/60 Hz and harmonics)
+        aux_hum = self.generate_tone(120, duration, amplitude=0.07)  # 120 Hz hum
+        aux_hum += self.generate_tone(60, duration, amplitude=0.04)  # 60 Hz base
+        aux_hum += self.generate_tone(180, duration, amplitude=0.03)  # 180 Hz harmonic
         
-        # High frequency inverter standby
-        inverter_idle = self.generate_noise(duration, amplitude=0.04, low_freq=3000, high_freq=5000)
+        # Air compressor with realistic cycling (turns on/off)
+        compressor_freq = 180
+        # Create a pulsing envelope for compressor cycling
+        compressor_cycle = 0.5 + 0.5 * np.sin(2 * np.pi * 0.3 * t)  # ~3 second cycle
+        compressor = self.generate_tone(compressor_freq, duration, amplitude=0.06)
+        compressor = compressor * compressor_cycle
         
-        combined = aux_hum + compressor + inverter_idle
+        # Cooling fans (varies slightly)
+        fan_freq = random.uniform(90, 110)
+        fan_sound = self.generate_tone(fan_freq, duration, amplitude=0.05)
+        fan_noise = self.generate_noise(duration, amplitude=0.03, low_freq=80, high_freq=300)
+        
+        # High frequency inverter standby with slight modulation
+        inverter_idle = self.generate_noise(duration, amplitude=0.035, low_freq=3000, high_freq=5000)
+        inverter_modulation = 1 + 0.1 * np.sin(2 * np.pi * 120 * t)
+        inverter_idle = inverter_idle * inverter_modulation
+        
+        # Occasional relay clicks and system sounds
+        relay_sound = np.zeros(samples)
+        num_relays = random.randint(1, 3)
+        for _ in range(num_relays):
+            relay_pos = random.randint(0, samples - 1000)
+            click = self.generate_tone(800, 0.02, amplitude=0.15)
+            relay_sound[relay_pos:relay_pos+len(click)] += click
+        
+        combined = aux_hum + compressor + fan_sound + fan_noise + inverter_idle + relay_sound
+        
+        # Smooth transitions
+        fade_samples = int(0.2 * self.sample_rate)
+        combined[:fade_samples] *= np.linspace(0.5, 1.0, fade_samples)
+        combined[-fade_samples:] *= np.linspace(1.0, 0.5, fade_samples)
+        
         self.play_sound(combined, blocking=False)
         time.sleep(duration)
     
-    def station_arrival(self):
-        """Simulate arriving at a station with compressed air brakes."""
-        print("\n📍 Approaching station...")
-        self.deceleration(2.5)
-        time.sleep(0.5)
+
+    
+    def continuous_journey_segment(self, duration: float):
+        """
+        Generate a continuous journey segment with smooth, realistic transitions.
         
-        # Stopped at station - electric idle sounds
-        print("  ⏸️  Stopped at station (electric systems humming)...")
-        self.electric_idle(1.0)
+        Args:
+            duration: Duration of the segment in seconds
+        """
+        # Continuous cruising with seamless variations
+        elapsed = 0
+        while elapsed < duration:
+            # Longer rumble duration for more continuous feel
+            rumble_duration = min(random.uniform(10.0, 18.0), duration - elapsed)
+            self.ambient_rumble(rumble_duration)
+            elapsed += rumble_duration
+            
+            # Occasionally add a gentle curve (realistic metro routes have curves)
+            if elapsed < duration - 3.0 and random.random() < 0.25:
+                turn_duration = random.uniform(2.5, 4.0)
+                remaining = duration - elapsed
+                if remaining >= turn_duration:
+                    self.gentle_curve(turn_duration)
+                    elapsed += turn_duration
+    
+    def station_departure_sequence(self):
+        """Execute a complete station departure sequence."""
+        print("\n📍 At station - preparing to depart...")
         
+        # Doors close
         self.door_closing()
-        time.sleep(0.5)
+        time.sleep(0.3)
+        
+        # Gradual acceleration
+        print("  🚀⚡ Departing station (gradual acceleration)...")
+        self.acceleration(4.0)
+    
+    def station_arrival_sequence(self):
+        """Execute a complete station arrival sequence."""
+        print("\n📍 Station ahead - preparing to stop...")
+        
+        # Gradual deceleration
+        self.deceleration(3.5)
+        time.sleep(0.3)
+        
+        # Stop at station with idle sounds
+        print("  ⏸️  Arrived at station (electric systems humming)...")
+        self.electric_idle(2.0)
     
     def run_simulation(self, duration_minutes: float = 2.0):
         """
-        Run the metro sound simulation.
+        Run a realistic metro sound simulation with continuous, logical sound progression.
         
         Args:
             duration_minutes: How long to run the simulation in minutes
         """
         print("\n" + "="*60)
-        print("🚇 METRO SOUND SIMULATOR 🚇")
+        print("🚇 REALISTIC METRO JOURNEY SIMULATOR 🚇")
         print("="*60)
-        print(f"Starting {duration_minutes}-minute metro journey...\n")
+        print(f"Starting {duration_minutes}-minute realistic metro journey...\n")
+        print("🎵 Continuous ambient sounds with logical transitions\n")
         
         start_time = time.time()
         end_time = start_time + (duration_minutes * 60)
         
         self.is_running = True
         
-        # Start with doors closing and acceleration
-        self.door_closing()
-        time.sleep(0.5)
-        self.acceleration(3.0)
-        
         try:
+            # Start journey: departure from initial station
+            self.station_departure_sequence()
+            
             while time.time() < end_time and self.is_running:
-                # Random event selection
-                event = random.choices(
-                    ['rumble', 'turn', 'station'],
-                    weights=[0.6, 0.25, 0.15],
-                    k=1
-                )[0]
+                remaining_time = end_time - time.time()
                 
-                if event == 'rumble':
-                    # Normal travel
-                    rumble_duration = random.uniform(3.0, 6.0)
-                    self.ambient_rumble(rumble_duration)
-                    
-                elif event == 'turn':
-                    # Sharp turn with screech
-                    self.turn_screech()
-                    time.sleep(random.uniform(0.5, 1.5))
-                    
-                elif event == 'station':
-                    # Station stop
-                    self.station_arrival()
-                    self.acceleration(3.0)
+                # Need at least 15 seconds for a station stop cycle
+                if remaining_time < 15:
+                    # Just cruise until time runs out
+                    self.continuous_journey_segment(remaining_time)
+                    break
                 
-                # Small pause between events
-                time.sleep(random.uniform(0.5, 1.5))
+                # Typical inter-station journey: 25-45 seconds of cruising
+                cruise_duration = min(random.uniform(25.0, 45.0), remaining_time - 10)
+                
+                print(f"\n🚇 Cruising to next station...")
+                self.continuous_journey_segment(cruise_duration)
+                
+                # Check if we have time for station stop
+                remaining_time = end_time - time.time()
+                if remaining_time >= 10:
+                    # Arrive at station
+                    self.station_arrival_sequence()
+                    
+                    # Check if we should depart (need time for departure)
+                    remaining_time = end_time - time.time()
+                    if remaining_time >= 5:
+                        self.station_departure_sequence()
+                    else:
+                        print("\n🏁 Journey ending at station...")
+                        break
         
         except KeyboardInterrupt:
             print("\n\n⏹️  Simulation stopped by user")

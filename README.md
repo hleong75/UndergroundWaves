@@ -1,18 +1,19 @@
 # UndergroundWaves 🚇
 
-A realistic metro/subway sound simulator that generates authentic underground railway sounds including ambient rumbling, screeching turns, door closures, and station stops.
+A realistic metro/subway sound simulator that generates authentic, continuous underground railway sounds with smooth transitions and logical journey sequences. Experience realistic station departures, smooth cruising, gentle curves, and gradual arrivals.
 
 ## Features
 
-- **Compressed Air Door Systems**: Realistic air pressure release, door motor sounds, and pneumatic hiss during door operation
-- **Compressed Air Brakes**: Air brake engagement and release sounds with friction effects
-- **Electric Traction Motors**: Harmonically rich motor whine with PWM inverter modulation
-- **Regenerative Braking**: Electric motor sounds during deceleration with falling pitch
-- **Power Inverter Sounds**: IGBT/MOSFET switching noise characteristic of modern electric trains
-- **Ambient Rumbling**: Continuous low-frequency rumble with electric motor hum in background
-- **Random Turn Events**: Sharp turns with realistic metal-on-metal screeching sounds
-- **Station Arrivals**: Complete sequence with electric idle sounds (compressor, auxiliaries)
-- **Realistic Timing**: Random event timing inspired by real metro operations
+- **🔄 Continuous Sound Journey**: Seamless audio experience with smooth transitions between all phases
+- **🚉 Realistic Journey Structure**: Logical progression through departure → cruising → arrival → stop cycles
+- **🚪 Smooth Door Operations**: Refined compressed air systems with melodic warning chimes and controlled door movements
+- **⚡ Gradual Acceleration/Deceleration**: Progressive power delivery and braking that mimics real electric trains
+- **🎵 Multi-layered Ambient Sounds**: Continuous motor hum, track vibrations, wheel-rail contact, and inverter noise
+- **💨 Regenerative + Air Braking**: Realistic combined braking system with gradual engagement
+- **🔧 Electric System Idle**: Authentic compressor cycling, cooling fans, and auxiliary systems at stations
+- **🌊 Smooth Transitions**: All sounds fade in/out naturally to eliminate abrupt changes
+- **🛤️ Gentle Curves**: Realistic curve negotiation without harsh screeching (reserved for controlled conditions)
+- **⏱️ Intelligent Timing**: Journey segments timed to create natural metro operation flow
 
 ## Installation
 
@@ -44,13 +45,13 @@ python metro_sounds.py
 
 You'll be prompted to enter how many minutes you want the simulation to run (default is 2 minutes).
 
-The program will generate:
-- Continuous rumbling sounds with electric motor hum
-- Random screeching when taking sharp turns
-- Door closing sequences with compressed air and warning beeps
-- Electric motor acceleration and regenerative braking
-- Compressed air brake sounds
-- Station arrival and departure sounds with electric idle
+The program will generate a **continuous, realistic journey** with:
+- Seamless ambient rumbling with layered electric motor sounds
+- Smooth acceleration and deceleration phases with gradual power changes
+- Realistic station sequences: arrival → idle systems → door operations → departure
+- Gentle curves with subtle sound variations (no harsh screeching)
+- Natural transitions between all sound phases
+- Multi-layered soundscapes that overlap for continuous audio experience
 
 Press `Ctrl+C` at any time to stop the simulation.
 
@@ -87,15 +88,18 @@ $ python metro_sounds.py
 How many minutes should the simulation run? (default: 2): 0.5
 ```
 
-## Sound Events
+## Journey Structure
 
-The simulator randomly generates these events:
+The simulator creates a **continuous, logical journey** following real metro operations:
 
-| Event | Probability | Description |
-|-------|-------------|-------------|
-| Ambient Rumble | 60% | Normal travel with low rumbling |
-| Sharp Turn | 25% | Metal screeching as metro turns |
-| Station Stop | 15% | Full deceleration, stop, and door sequence |
+| Phase | Duration | Description |
+|-------|----------|-------------|
+| **Station Departure** | ~5-6s | Door closing → smooth acceleration with progressive power |
+| **Cruising** | 25-45s | Continuous ambient sounds with occasional gentle curves |
+| **Approaching Station** | ~4s | Gradual deceleration with regenerative + air braking |
+| **At Station** | ~2-3s | Electric idle systems (compressors, fans, auxiliaries) |
+
+All phases transition smoothly with overlapping sounds for a seamless, realistic experience.
 
 ## Technical Details
 
