@@ -10,7 +10,7 @@ Comprend des événements aléatoires comme des virages avec grincements et des 
 import numpy as np
 import time
 import random
-from typing import Tuple
+from typing import Tuple, Optional
 
 # Try to import sounddevice, but allow the module to work without it for testing
 try:
@@ -20,19 +20,62 @@ except (ImportError, OSError):
     AUDIO_AVAILABLE = False
     print("⚠️  Warning: Audio playback not available. Running in silent mode.")
 
+# Import AI-enhanced sound engine
+from ai_sound_engine import (
+    SoundContext, 
+    AIParameterLearner,
+    IntelligentNoiseGenerator,
+    ContextAwareFrequencyModulator,
+    AdaptiveSoundEvolution,
+    IntelligentEventPredictor
+)
+
 
 class MetroSoundSimulator:
-    """Simulates realistic metro/subway sounds with random events."""
+    """Simulates realistic metro/subway sounds with random events and AI-enhanced generation."""
     
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 44100, enable_ai: bool = True):
         """
         Initialize the metro sound simulator.
         
         Args:
             sample_rate: Audio sample rate in Hz (default: 44100)
+            enable_ai: Enable AI-enhanced sound generation (default: True)
         """
         self.sample_rate = sample_rate
         self.is_running = False
+        self.enable_ai = enable_ai
+        
+        # Initialize AI components
+        if self.enable_ai:
+            self.ai_noise_generator = IntelligentNoiseGenerator(sample_rate)
+            self.ai_frequency_modulator = ContextAwareFrequencyModulator()
+            self.ai_evolution = AdaptiveSoundEvolution()
+            self.ai_event_predictor = IntelligentEventPredictor()
+            self.ai_parameter_learner = AIParameterLearner()
+            
+            # Initialize journey context
+            self.context = SoundContext(
+                journey_time=0.0,
+                speed=0.0,
+                acceleration=0.0,
+                temperature=random.uniform(15.0, 25.0),
+                track_wear=random.uniform(0.3, 0.7),
+                vehicle_age=random.uniform(0.2, 0.8),
+                passenger_load=random.uniform(0.3, 0.8),
+                weather_condition=random.choice(['normal', 'normal', 'normal', 'rain', 'cold'])
+            )
+            
+            print(f"🤖 AI-Enhanced Sound Engine initialized")
+            print(f"   Vehicle age: {self.context.vehicle_age:.1%}, Track wear: {self.context.track_wear:.1%}")
+            print(f"   Temperature: {self.context.temperature:.1f}°C, Passengers: {self.context.passenger_load:.1%}")
+        else:
+            self.ai_noise_generator = None
+            self.ai_frequency_modulator = None
+            self.ai_evolution = None
+            self.ai_event_predictor = None
+            self.ai_parameter_learner = None
+            self.context = None
         
     def generate_tone(self, frequency: float, duration: float, amplitude: float = 0.3) -> np.ndarray:
         """
@@ -54,6 +97,7 @@ class MetroSoundSimulator:
                        low_freq: float = 50, high_freq: float = 200) -> np.ndarray:
         """
         Generate filtered noise (simulates rumbling).
+        AI-enhanced version uses context-aware intelligent noise generation.
         
         Args:
             duration: Duration in seconds
@@ -64,6 +108,18 @@ class MetroSoundSimulator:
         Returns:
             Audio samples as numpy array
         """
+        # Use AI-enhanced noise generation if enabled
+        if self.enable_ai and self.ai_noise_generator:
+            noise = self.ai_noise_generator.generate_intelligent_noise(
+                duration, amplitude, self.context
+            )
+            # Apply frequency filtering
+            window_size = int(self.sample_rate / high_freq)
+            if window_size > 1:
+                noise = np.convolve(noise, np.ones(window_size)/window_size, mode='same')
+            return noise
+        
+        # Fallback to standard noise generation
         samples = int(self.sample_rate * duration)
         # Generate white noise
         noise = np.random.normal(0, amplitude, samples)
@@ -131,6 +187,7 @@ class MetroSoundSimulator:
                                       end_freq: float = 800, amplitude: float = 0.15) -> np.ndarray:
         """
         Generate electric traction motor whine (characteristic of electric trains).
+        AI-enhanced version uses intelligent frequency modulation and harmonic generation.
         
         Args:
             duration: Duration in seconds
@@ -141,6 +198,23 @@ class MetroSoundSimulator:
         Returns:
             Audio samples as numpy array
         """
+        # AI-enhanced frequency modulation
+        if self.enable_ai and self.ai_frequency_modulator and self.context:
+            start_freq = self.ai_frequency_modulator.modulate_frequency(
+                start_freq, 'motor_whine', self.context
+            )
+            end_freq = self.ai_frequency_modulator.modulate_frequency(
+                end_freq, 'motor_whine', self.context
+            )
+            
+            # Get AI-generated harmonics
+            harmonics_start = self.ai_frequency_modulator.get_harmonic_intelligence(
+                start_freq, 'motor', self.context
+            )
+            harmonics_end = self.ai_frequency_modulator.get_harmonic_intelligence(
+                end_freq, 'motor', self.context
+            )
+        
         # Electric motor produces harmonically rich sound
         fundamental = self.generate_sweep(start_freq, end_freq, duration, amplitude)
         
@@ -159,6 +233,11 @@ class MetroSoundSimulator:
         t = np.linspace(0, duration, samples, False)
         pwm_freq = random.uniform(4000, 6000)  # Inverter switching frequency
         pwm_modulation = 1 + 0.03 * np.sin(2 * np.pi * pwm_freq * t)
+        
+        # Apply AI evolution effects if enabled
+        if self.enable_ai and self.ai_evolution:
+            temp_mod = self.ai_evolution.get_temperature_modulation()
+            combined = combined * temp_mod
         
         return combined * pwm_modulation
     
@@ -862,11 +941,22 @@ class MetroSoundSimulator:
     def acceleration(self, duration: float = 3.0):
         """
         Simulate gradual, realistic electric metro acceleration with smooth power delivery.
+        AI-enhanced version adapts to context and evolves over time.
         
         Args:
             duration: Duration in seconds
         """
         print("  🚀⚡ Smoothly accelerating (electric traction motors)...")
+        
+        # Update AI context for acceleration
+        if self.enable_ai and self.context:
+            self.context.acceleration = 2.0  # m/s^2
+            self.context.speed = 30.0  # Average speed during acceleration
+            self.context.journey_time += duration
+            
+            # Update evolution state
+            if self.ai_evolution:
+                self.ai_evolution.update(duration, self.context)
         # Base rumble from wheels - starts quiet, gets louder
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples, False)
@@ -929,11 +1019,23 @@ class MetroSoundSimulator:
     def deceleration(self, duration: float = 2.5):
         """
         Simulate gradual, realistic metro deceleration with regenerative braking and air brakes.
+        AI-enhanced version adapts to context and evolves over time.
         
         Args:
             duration: Duration in seconds
         """
         print("  🛑💨 Gradually slowing down (regenerative + air brakes)...")
+        
+        # Update AI context for deceleration
+        if self.enable_ai and self.context:
+            self.context.acceleration = -1.5  # m/s^2 (braking)
+            self.context.speed = 20.0  # Average speed during deceleration
+            self.context.journey_time += duration
+            
+            # Update evolution state (braking heats up brakes)
+            if self.ai_evolution:
+                self.ai_evolution.update(duration, self.context)
+        
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples, False)
         
@@ -1060,10 +1162,16 @@ class MetroSoundSimulator:
     def continuous_journey_segment(self, duration: float):
         """
         Generate a continuous journey segment with smooth, realistic transitions.
+        AI-enhanced version uses intelligent event prediction.
         
         Args:
             duration: Duration of the segment in seconds
         """
+        # Update AI context for cruising
+        if self.enable_ai and self.context:
+            self.context.acceleration = 0.0
+            self.context.speed = 50.0  # Cruising speed
+        
         # Continuous cruising with seamless variations
         elapsed = 0
         while elapsed < duration:
@@ -1072,29 +1180,59 @@ class MetroSoundSimulator:
             self.ambient_rumble(rumble_duration)
             elapsed += rumble_duration
             
-            # Occasionally add a rail switch crossing (switches are common on metro lines)
-            if elapsed < duration - 1.5 and random.random() < 0.15:
-                print("  🛤️  Crossing rail switch (aiguillage)...")
-                switch_sound = self.generate_rail_switch(1.2, amplitude=0.22)
-                self.play_sound(switch_sound, blocking=False)
-                time.sleep(1.2)
-                elapsed += 1.2
-            
-            # Occasionally add rail defects (less frequent than switches)
-            if elapsed < duration - 1.0 and random.random() < 0.12:
-                print("  ⚠️  Rail defect detected...")
-                defect_sound = self.generate_rail_defects(0.8, amplitude=0.18)
-                self.play_sound(defect_sound, blocking=False)
-                time.sleep(0.8)
-                elapsed += 0.8
-            
-            # Occasionally add a gentle curve (realistic metro routes have curves)
-            if elapsed < duration - 3.0 and random.random() < 0.25:
-                turn_duration = random.uniform(2.5, 4.0)
-                remaining = duration - elapsed
-                if remaining >= turn_duration:
-                    self.gentle_curve(turn_duration)
-                    elapsed += turn_duration
+            # AI-driven event prediction
+            if self.enable_ai and self.ai_event_predictor and self.context:
+                predicted_event = self.ai_event_predictor.predict_event(
+                    self.context.journey_time, self.context
+                )
+                
+                if predicted_event == 'rail_switch' and elapsed < duration - 1.5:
+                    print("  🛤️🤖 AI detected: Crossing rail switch (aiguillage)...")
+                    switch_sound = self.generate_rail_switch(1.2, amplitude=0.22)
+                    self.play_sound(switch_sound, blocking=False)
+                    time.sleep(1.2)
+                    elapsed += 1.2
+                    continue
+                elif predicted_event == 'rail_defect' and elapsed < duration - 1.0:
+                    print("  ⚠️🤖 AI detected: Rail defect...")
+                    defect_sound = self.generate_rail_defects(0.8, amplitude=0.18)
+                    self.play_sound(defect_sound, blocking=False)
+                    time.sleep(0.8)
+                    elapsed += 0.8
+                    continue
+                elif predicted_event == 'curve' and elapsed < duration - 3.0:
+                    turn_duration = random.uniform(2.5, 4.0)
+                    remaining = duration - elapsed
+                    if remaining >= turn_duration:
+                        print("  🔄🤖 AI detected: Gentle curve...")
+                        self.gentle_curve(turn_duration)
+                        elapsed += turn_duration
+                        continue
+            else:
+                # Fallback to random events if AI disabled
+                # Occasionally add a rail switch crossing (switches are common on metro lines)
+                if elapsed < duration - 1.5 and random.random() < 0.15:
+                    print("  🛤️  Crossing rail switch (aiguillage)...")
+                    switch_sound = self.generate_rail_switch(1.2, amplitude=0.22)
+                    self.play_sound(switch_sound, blocking=False)
+                    time.sleep(1.2)
+                    elapsed += 1.2
+                
+                # Occasionally add rail defects (less frequent than switches)
+                if elapsed < duration - 1.0 and random.random() < 0.12:
+                    print("  ⚠️  Rail defect detected...")
+                    defect_sound = self.generate_rail_defects(0.8, amplitude=0.18)
+                    self.play_sound(defect_sound, blocking=False)
+                    time.sleep(0.8)
+                    elapsed += 0.8
+                
+                # Occasionally add a gentle curve (realistic metro routes have curves)
+                if elapsed < duration - 3.0 and random.random() < 0.25:
+                    turn_duration = random.uniform(2.5, 4.0)
+                    remaining = duration - elapsed
+                    if remaining >= turn_duration:
+                        self.gentle_curve(turn_duration)
+                        elapsed += turn_duration
     
     def station_departure_sequence(self):
         """Execute a complete station departure sequence."""
@@ -1193,6 +1331,7 @@ def main():
         print("  - Windows: Audio should work with pip install sounddevice\n")
     
     print("This program simulates realistic metro/subway sounds including:")
+    print("  - 🤖 AI-Enhanced sound generation")
     print("  - Ambient rumbling and engine noise")
     print("  - Random turns with metal screeching")
     print("  - Door closing sequences with warning beeps")

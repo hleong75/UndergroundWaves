@@ -4,6 +4,15 @@ A realistic metro/subway sound simulator that generates authentic, continuous un
 
 ## Features
 
+### 🤖 AI-Enhanced Sound Generation (NEW!)
+- **Intelligent Parameter Learning**: AI learns from sound patterns and adapts over journey
+- **Context-Aware Generation**: Sound characteristics change based on speed, temperature, track wear, vehicle age
+- **Adaptive Sound Evolution**: Realistic simulation of brake heating, motor temperature, bearing wear over time
+- **Smart Event Prediction**: AI predicts rail switches, defects, and other events based on journey context
+- **Statistical Modeling**: Machine learning-inspired algorithms for realistic sound variations
+- **Real-time Adaptation**: Sounds evolve naturally as the journey progresses
+
+### Core Features
 - **🔄 Continuous Sound Journey**: Seamless audio experience with smooth transitions between all phases
 - **🚉 Realistic Journey Structure**: Logical progression through departure → cruising → arrival → stop cycles
 - **🚪 Smooth Door Operations**: Refined compressed air systems with melodic warning chimes and controlled door movements
@@ -62,6 +71,7 @@ Press `Ctrl+C` at any time to stop the simulation.
 The simulator uses:
 - **numpy** for audio signal generation
 - **sounddevice** for real-time audio playback
+- **AI-enhanced sound engine** for intelligent, adaptive sound generation
 - Procedural audio synthesis to create realistic sounds:
   - Low-frequency noise for rumbling
   - Frequency sweeps for screeching and electric motor whine
@@ -76,6 +86,24 @@ The simulator uses:
   - Rapid modulation for wheel slip effects
   - Complex impact patterns for rail switches (aiguillages)
   - Various rail defect simulations (corrugation, flat spots, worn joints, irregularities)
+
+### AI-Enhanced Features
+
+The AI sound engine adds intelligent, context-aware generation:
+- **AIParameterLearner**: Learns from sound parameters and predicts realistic variations
+- **IntelligentNoiseGenerator**: Context-aware noise with spectral intelligence and learned patterns
+- **ContextAwareFrequencyModulator**: Adapts frequencies based on speed, temperature, track condition
+- **AdaptiveSoundEvolution**: Simulates brake heating, motor temperature, bearing wear over time
+- **IntelligentEventPredictor**: Predicts events (switches, defects) based on journey context
+- **SoundContext**: Tracks journey state (speed, acceleration, temperature, wear, passenger load)
+
+The AI system considers:
+- **Vehicle age**: Older vehicles have more harmonics and mechanical noise
+- **Track wear**: Worn tracks increase high-frequency content and defect probability
+- **Temperature**: Affects metal expansion and sound characteristics
+- **Speed**: Influences motor frequencies and sound intensity
+- **Passenger load**: Dampens high frequencies
+- **Weather conditions**: Rain dampens sounds, cold affects materials
 
 All sounds are generated in real-time using mathematical models inspired by actual metro/subway acoustics, specifically modeling:
 - **Compressed air systems** (doors and brakes)
@@ -114,8 +142,12 @@ All phases transition smoothly with overlapping sounds for a seamless, realistic
 
 - Sample Rate: 44,100 Hz (CD quality)
 - Audio Format: 16-bit PCM
-- Event-based architecture with randomized timing
+- Event-based architecture with AI-driven event prediction
 - Real-time audio synthesis
+- **AI Engine**: Machine learning-inspired statistical models
+- **Context System**: Real-time journey state tracking
+- **Adaptive Evolution**: Dynamic sound characteristic changes
+- **Backward Compatible**: AI can be disabled with `enable_ai=False`
 
 ## License
 
