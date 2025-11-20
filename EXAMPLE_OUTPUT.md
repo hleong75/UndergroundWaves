@@ -1,6 +1,6 @@
 # Example Output
 
-Here's what you'll see when running the Metro Sound Simulator:
+Here's what you'll see when running the **Realistic Metro Journey Simulator**:
 
 ## Running the Main Simulator
 
@@ -21,27 +21,35 @@ How many minutes should the simulation run? (default: 2): 1
 Press Ctrl+C at any time to stop the simulation.
 
 ============================================================
-🚇 METRO SOUND SIMULATOR 🚇
+🚇 REALISTIC METRO JOURNEY SIMULATOR 🚇
 ============================================================
-Starting 1-minute metro journey...
+Starting 1.0-minute realistic metro journey...
 
-  🚪 Doors closing! Beep beep beep...
-  💨 *PSSSHHHH* (compressed air) *WHIRRRR* *THUNK*
-  🚀⚡ Accelerating (electric motor whine)...
-  🚇⚡ Rumbling along the tracks (electric motors)...
-  🔊 SCREEEECH! Taking a sharp turn...
-  🚇⚡ Rumbling along the tracks (electric motors)...
-  🚇⚡ Rumbling along the tracks (electric motors)...
+🎵 Continuous ambient sounds with logical transitions
 
-📍 Approaching station...
-  🛑💨 Slowing down (air brakes + regen braking)...
-  ⏸️  Stopped at station (electric systems humming)...
-  🚪 Doors closing! Beep beep beep...
-  💨 *PSSSHHHH* (compressed air) *WHIRRRR* *THUNK*
-  🚀⚡ Accelerating (electric motor whine)...
-  🚇⚡ Rumbling along the tracks (electric motors)...
-  🔊 SCREEEECH! Taking a sharp turn...
-  🚇⚡ Rumbling along the tracks (electric motors)...
+
+📍 At station - preparing to depart...
+  🚪 Doors closing (warning chime)...
+  💨 Air system engaging - doors closing smoothly...
+  🚀⚡ Departing station (gradual acceleration)...
+  🚀⚡ Smoothly accelerating (electric traction motors)...
+
+🚇 Cruising to next station...
+  🚇⚡ Cruising smoothly (continuous motor hum)...
+  🚇⚡ Cruising smoothly (continuous motor hum)...
+  🔄 Taking a gentle curve...
+  🚇⚡ Cruising smoothly (continuous motor hum)...
+
+📍 Station ahead - preparing to stop...
+  🛑💨 Gradually slowing down (regenerative + air brakes)...
+  ⏸️  Arrived at station (electric systems humming)...
+
+📍 At station - preparing to depart...
+  🚪 Doors closing (warning chime)...
+  💨 Air system engaging - doors closing smoothly...
+  🚀⚡ Departing station (gradual acceleration)...
+  🚀⚡ Smoothly accelerating (electric traction motors)...
+  🚇⚡ Cruising smoothly (continuous motor hum)...
 
 ============================================================
 🏁 Metro journey complete!
@@ -99,64 +107,82 @@ This demo will showcase all the sound features:
 To run a full simulation, use: python metro_sounds.py
 ```
 
-## Sound Events
+## Sound Phases
 
-The simulator randomly generates these authentic metro sounds:
+The simulator creates a **continuous journey** with these authentic metro sounds:
 
-### 🚇⚡ Ambient Rumble (Electric Train)
+### 🚇⚡ Continuous Cruising (Electric Train)
 - Low frequency rumbling (40-150 Hz) from wheels
-- Constant electric motor hum (400-600 Hz)
+- Multi-layered electric motor hum (450-550 Hz + harmonics)
+- Wheel-rail contact sounds (800-2000 Hz)
 - Inverter background noise (4-7 kHz)
-- Periodic track vibrations at ~8 Hz
-- Duration: 3-6 seconds
+- Periodic track vibrations at ~3 Hz and ~8 Hz
+- Natural random variations for realism
+- Smooth fade in/out transitions
+- Duration: 10-18 seconds per segment
 
-### 🔊 Sharp Turn / Screeching
-- High frequency sweeps (600-1200 Hz)
-- Metal-on-metal screech effect
-- Multiple frequency components layered
-- Duration: 1.5-3 seconds
+### 🔄 Gentle Curves
+- Subtle motor frequency changes (500-600 Hz)
+- Slightly increased rumble
+- Mild wheel-rail contact variations
+- No harsh screeching - realistic curve negotiation
+- Duration: 2.5-4 seconds
 
-### 🚪💨 Door Closing (Compressed Air System)
-1. Three warning beeps at 800 Hz (0.2s each)
+### 🚪💨 Smooth Door Operations (Compressed Air System)
+1. Three melodic warning chimes at 800 Hz (~0.18s each)
 2. Short pause
-3. Compressed air pressure release (exponential decay)
-4. Door motor sound (200-150 Hz sweep)
-5. Continuous air hiss during movement
-6. Final air equalization
-7. Door slam (150 Hz thunk)
+3. Compressed air pressure release (softer, controlled)
+4. Door motor sound (210-145 Hz sweep over 1s)
+5. Continuous air hiss during movement (quieter, smoother)
+6. Door mechanism sounds (150-400 Hz)
+7. Final air equalization and gentle seal (145 Hz)
+8. All with smooth fade in/out envelopes
 
-### 🚀⚡ Acceleration (Electric Motor)
-- Electric traction motor whine (300-900 Hz sweep)
-- Multiple harmonics (2x, 3x fundamental)
-- Power inverter startup (PWM at 4-6 kHz)
-- Base rumble from wheels
-- Duration: ~3 seconds
+### 🚀⚡ Gradual Acceleration (Electric Traction Motors)
+- Progressive power delivery with amplitude ramping
+- Electric traction motor whine (250-850 Hz sweep)
+- Motor load harmonics (500-1700 Hz)
+- Power inverter startup surge (PWM at 4-6 kHz with decay)
+- Track noise increasing with speed
+- Base rumble growing from quiet to full
+- Smooth fade-in at start
+- Duration: ~4 seconds (adjustable)
 
-### 🛑💨 Deceleration (Regenerative + Air Brakes)
-- Electric motor regen braking (800-250 Hz sweep)
-- Compressed air brake engagement
-- Brake pad friction (100-400 Hz)
-- Combined braking systems
-- Duration: ~2.5 seconds
+### 🛑💨 Gradual Deceleration (Regenerative + Air Brakes)
+- Progressive power reduction with envelope
+- Electric regen braking (850-200 Hz sweep)
+- Motor harmonics fading (1700-400 Hz)
+- Delayed air brake engagement (starts 20% into decel)
+- Brake pad friction increasing progressively (100-400 Hz)
+- Track noise decreasing with speed
+- Smooth fade-out at end
+- Duration: ~3.5 seconds (adjustable)
 
-### ⏸️⚡ Station Stop (Electric Idle)
-- Auxiliary systems hum (120 Hz)
-- Air compressor cycling (180 Hz)
-- Inverter standby noise (3-5 kHz)
-- Realistic idle power consumption sounds
+### ⏸️⚡ Electric Idle at Station (Realistic Auxiliary Systems)
+- Main power supply hum (60, 120, 180 Hz harmonics)
+- Air compressor with realistic on/off cycling (~3s period)
+- Cooling fan sounds (90-110 Hz + turbulence)
+- Inverter standby with 120 Hz modulation (3-5 kHz)
+- Occasional relay clicks for realism
+- All with smooth fade transitions
+- Duration: ~2 seconds at each stop
 
-### 📍 Station Arrival
-- Complete deceleration with air brakes
-- Stop with electric idle sounds
-- Compressed air door operation
-- Electric motor acceleration for departure
+## Journey Logic
 
-## Event Probabilities
+The simulator follows a **realistic, continuous journey pattern**:
 
-The simulator uses weighted random selection:
+**Journey Structure:**
+1. **Departure Phase** (~5-6s): Door close → Smooth acceleration
+2. **Cruising Phase** (25-45s): Continuous ambient with occasional gentle curves
+3. **Arrival Phase** (~4s): Gradual deceleration → Station idle
+4. **Dwell Time** (~2-3s): Electric systems running → Next departure
 
-- **60%** - Ambient rumbling (normal travel)
-- **25%** - Sharp turn with screeching
-- **15%** - Station arrival and departure
+**Key Improvements:**
+- ✅ **Continuous soundscape** - no silence gaps
+- ✅ **Logical transitions** - sounds flow naturally into each other
+- ✅ **Progressive changes** - no abrupt jumps in sound
+- ✅ **Realistic timing** - based on actual metro operations
+- ✅ **Smooth curves** - no harsh "breakdown-like" screeching
+- ✅ **Overlapping audio** - multiple layers for richness
 
-This creates a realistic metro journey experience with varied events!
+This creates an immersive, realistic metro journey that sounds **continuous and natural**!
