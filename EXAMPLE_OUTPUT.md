@@ -1,6 +1,6 @@
 # Example Output
 
-Here's what you'll see when running the **Realistic Metro Journey Simulator**:
+Here's what you'll see when running the **AI-Enhanced Realistic Metro Journey Simulator**:
 
 ## Running the Main Simulator
 
@@ -10,6 +10,7 @@ $ python metro_sounds.py
 🎵 Welcome to the Metro Sound Simulator! 🎵
 
 This program simulates realistic metro/subway sounds including:
+  - 🤖 AI-Enhanced sound generation
   - Ambient rumbling and engine noise
   - Random turns with metal screeching
   - Door closing sequences with warning beeps
@@ -25,6 +26,10 @@ Press Ctrl+C at any time to stop the simulation.
 ============================================================
 Starting 1.0-minute realistic metro journey...
 
+🤖 AI-Enhanced Sound Engine initialized
+   Vehicle age: 65.4%, Track wear: 52.3%
+   Temperature: 21.5°C, Passengers: 58.7%
+
 🎵 Continuous ambient sounds with logical transitions
 
 
@@ -36,9 +41,11 @@ Starting 1.0-minute realistic metro journey...
 
 🚇 Cruising to next station...
   🚇⚡ Cruising smoothly (continuous motor hum)...
+  🛤️🤖 AI detected: Crossing rail switch (aiguillage)...
   🚇⚡ Cruising smoothly (continuous motor hum)...
-  🔄 Taking a gentle curve...
+  🔄🤖 AI detected: Gentle curve...
   🚇⚡ Cruising smoothly (continuous motor hum)...
+  ⚠️🤖 AI detected: Rail defect...
 
 📍 Station ahead - preparing to stop...
   🛑💨 Gradually slowing down (regenerative + air brakes)...
@@ -62,8 +69,26 @@ Starting 1.0-minute realistic metro journey...
 $ python demo.py
 
 ============================================================
-🚇 METRO SOUND SIMULATOR - QUICK DEMO
+🚇⚡💨🛤️🤖 METRO SOUND SIMULATOR - QUICK DEMO
 ============================================================
+
+This demo showcases all sound features including:
+  - 🤖 AI-Enhanced Sound Generation (NEW!)
+  - Compressed air door systems
+  - Compressed air brakes
+  - Electric traction motors
+  - Power inverters (IGBT/PWM)
+  - Wheel-rail friction sounds
+
+🤖 AI Features:
+  - Context-aware sound generation
+  - Adaptive sound evolution over time
+  - Intelligent event prediction
+  - Realistic wear and temperature simulation
+
+🤖 AI-Enhanced Sound Engine initialized
+   Vehicle age: 42.5%, Track wear: 69.9%
+   Temperature: 23.3°C, Passengers: 69.2%
 
 This demo will showcase all the sound features:
 
@@ -103,6 +128,28 @@ This demo will showcase all the sound features:
 ============================================================
 ✅ Demo complete!
 ============================================================
+
+Features demonstrated:
+  ✓ 🤖 AI-Enhanced sound generation
+  ✓ Context-aware frequency modulation
+  ✓ Adaptive sound evolution
+  ✓ Compressed air door systems
+  ✓ Compressed air brakes
+  ✓ Electric traction motors with harmonics
+  ✓ Power inverter (PWM) sounds
+  ✓ Regenerative braking
+  ✓ Auxiliary electric systems
+  ✓ Rail joint clicks (clickety-clack)
+  ✓ Wheel flange squeal on curves
+  ✓ Brake squeal
+  ✓ Low-speed grinding
+  ✓ Wheel slip sounds
+
+🤖 AI enhancements make sounds more realistic by:
+  • Learning from journey context
+  • Adapting to speed, temperature, and wear
+  • Evolving over time (brake heating, bearing wear)
+  • Intelligently predicting events
 
 To run a full simulation, use: python metro_sounds.py
 ```
