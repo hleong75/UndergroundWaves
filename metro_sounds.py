@@ -379,6 +379,269 @@ class MetroSoundSimulator:
         envelope = np.exp(-3 * np.linspace(0, 1, samples))
         
         return combined * envelope
+    
+    def generate_rail_switch(self, duration: float = 1.2, amplitude: float = 0.25) -> np.ndarray:
+        """
+        Generate rail switch/points (aiguillage) sound.
+        
+        Railway switches create distinctive sounds as wheels cross the gaps and movable rails:
+        - Multiple sharp metallic clicks as wheels hit the gaps
+        - Clunking sounds from the switch mechanism
+        - Rhythmic pattern as bogies cross (front then rear wheels)
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        combined = np.zeros(samples)
+        
+        # Main sequence: front bogie hits switch, then rear bogie
+        # Front bogie crossing (first set of impacts)
+        t1 = 0.0
+        for i in range(2):  # Two wheels per bogie (left and right)
+            click_pos = int(t1 * self.sample_rate)
+            if click_pos < samples:
+                # Sharp metallic click from wheel hitting gap/frog
+                click_freq = random.uniform(1800, 2400)
+                click_duration = 0.015
+                click = self.generate_tone(click_freq, click_duration, amplitude * 0.9)
+                click_envelope = np.exp(-80 * np.linspace(0, 1, len(click)))
+                click = click * click_envelope
+                
+                # Add metallic ringing
+                ring = self.generate_tone(click_freq * 1.5, 0.05, amplitude * 0.4)
+                ring_envelope = np.exp(-40 * np.linspace(0, 1, len(ring)))
+                ring = ring * ring_envelope
+                
+                # Add low-frequency clunk from impact
+                clunk = self.generate_tone(280, 0.03, amplitude * 0.6)
+                clunk_envelope = np.exp(-50 * np.linspace(0, 1, len(clunk)))
+                clunk = clunk * clunk_envelope
+                
+                # Combine all parts
+                end_pos = min(click_pos + len(click), samples)
+                combined[click_pos:end_pos] += click[:end_pos - click_pos]
+                
+                ring_pos = click_pos + int(0.005 * self.sample_rate)
+                if ring_pos < samples:
+                    end_pos = min(ring_pos + len(ring), samples)
+                    combined[ring_pos:end_pos] += ring[:end_pos - ring_pos]
+                
+                clunk_pos = click_pos + int(0.002 * self.sample_rate)
+                if clunk_pos < samples:
+                    end_pos = min(clunk_pos + len(clunk), samples)
+                    combined[clunk_pos:end_pos] += clunk[:end_pos - clunk_pos]
+            
+            t1 += random.uniform(0.05, 0.08)  # Slight offset between left/right wheels
+        
+        # Rear bogie crossing (second set of impacts) - happens after bogie spacing delay
+        t2 = random.uniform(0.4, 0.5)  # Typical bogie spacing at cruising speed
+        for i in range(2):
+            click_pos = int(t2 * self.sample_rate)
+            if click_pos < samples:
+                # Similar pattern for rear wheels
+                click_freq = random.uniform(1700, 2300)
+                click_duration = 0.015
+                click = self.generate_tone(click_freq, click_duration, amplitude * 0.85)
+                click_envelope = np.exp(-80 * np.linspace(0, 1, len(click)))
+                click = click * click_envelope
+                
+                ring = self.generate_tone(click_freq * 1.5, 0.05, amplitude * 0.35)
+                ring_envelope = np.exp(-40 * np.linspace(0, 1, len(ring)))
+                ring = ring * ring_envelope
+                
+                clunk = self.generate_tone(270, 0.03, amplitude * 0.55)
+                clunk_envelope = np.exp(-50 * np.linspace(0, 1, len(clunk)))
+                clunk = clunk * clunk_envelope
+                
+                end_pos = min(click_pos + len(click), samples)
+                combined[click_pos:end_pos] += click[:end_pos - click_pos]
+                
+                ring_pos = click_pos + int(0.005 * self.sample_rate)
+                if ring_pos < samples:
+                    end_pos = min(ring_pos + len(ring), samples)
+                    combined[ring_pos:end_pos] += ring[:end_pos - ring_pos]
+                
+                clunk_pos = click_pos + int(0.002 * self.sample_rate)
+                if clunk_pos < samples:
+                    end_pos = min(clunk_pos + len(clunk), samples)
+                    combined[clunk_pos:end_pos] += clunk[:end_pos - clunk_pos]
+            
+            t2 += random.uniform(0.05, 0.08)
+        
+        # Add switch mechanism sounds - rattling from movable rails
+        switch_rattle = self.generate_noise(0.3, amplitude * 0.2, low_freq=400, high_freq=1200)
+        rattle_start = int(0.1 * self.sample_rate)
+        rattle_end = min(rattle_start + len(switch_rattle), samples)
+        combined[rattle_start:rattle_end] += switch_rattle[:rattle_end - rattle_start]
+        
+        # Add brief rumble increase during crossing
+        rumble_duration = min(0.8, duration)
+        rumble = self.generate_noise(rumble_duration, amplitude * 0.15, low_freq=60, high_freq=200)
+        rumble_start = int(0.05 * self.sample_rate)
+        rumble_end = min(rumble_start + len(rumble), samples)
+        combined[rumble_start:rumble_end] += rumble[:rumble_end - rumble_start]
+        
+        return combined
+    
+    def generate_rail_defects(self, duration: float = 0.8, amplitude: float = 0.2) -> np.ndarray:
+        """
+        Generate rail defect sounds (imperfections in rails).
+        
+        Rail defects include:
+        - Corrugation (regular ripples in rail surface) causing rhythmic thumping
+        - Flat spots on wheels causing periodic impacts
+        - Worn rail joints causing louder clicks
+        - Track irregularities causing random bumps
+        
+        Args:
+            duration: Duration in seconds
+            amplitude: Volume level
+            
+        Returns:
+            Audio samples as numpy array
+        """
+        samples = int(self.sample_rate * duration)
+        combined = np.zeros(samples)
+        t = np.linspace(0, duration, samples, False)
+        
+        # Select random defect type
+        defect_type = random.choice(['corrugation', 'flat_spot', 'worn_joint', 'irregularity'])
+        
+        if defect_type == 'corrugation':
+            # Corrugation causes regular rhythmic thumping
+            # Frequency depends on speed and corrugation wavelength
+            thump_freq = random.uniform(8, 15)  # 8-15 Hz is typical
+            
+            # Generate rhythmic thumping pattern
+            thumps = 0.5 + 0.5 * np.abs(np.sin(2 * np.pi * thump_freq * t))
+            
+            # Low frequency impacts
+            base_thump = self.generate_noise(duration, amplitude * 0.7, low_freq=80, high_freq=300)
+            combined += base_thump * thumps
+            
+            # Add higher frequency components for metallic character
+            metal_buzz = self.generate_noise(duration, amplitude * 0.4, low_freq=800, high_freq=2000)
+            combined += metal_buzz * thumps
+            
+        elif defect_type == 'flat_spot':
+            # Flat spot on wheel causes periodic loud impact
+            # Calculate impacts per wheel revolution at speed
+            wheel_rpm = random.uniform(6, 12)  # RPM at typical metro speed
+            impact_interval = 60.0 / wheel_rpm  # Time between impacts
+            
+            # Create sharp impacts at regular intervals
+            num_impacts = int(duration / impact_interval)
+            for i in range(num_impacts):
+                impact_time = i * impact_interval + random.uniform(-0.02, 0.02)
+                impact_pos = int(impact_time * self.sample_rate)
+                
+                if impact_pos < samples:
+                    # Sharp thud from flat spot hitting rail
+                    thud_freq = random.uniform(200, 400)
+                    thud = self.generate_tone(thud_freq, 0.03, amplitude * 0.8)
+                    thud_envelope = np.exp(-60 * np.linspace(0, 1, len(thud)))
+                    thud = thud * thud_envelope
+                    
+                    # Add metallic ring
+                    ring = self.generate_tone(1200, 0.04, amplitude * 0.4)
+                    ring_envelope = np.exp(-40 * np.linspace(0, 1, len(ring)))
+                    ring = ring * ring_envelope
+                    
+                    end_pos = min(impact_pos + len(thud), samples)
+                    combined[impact_pos:end_pos] += thud[:end_pos - impact_pos]
+                    
+                    ring_pos = impact_pos + int(0.003 * self.sample_rate)
+                    if ring_pos < samples:
+                        end_pos = min(ring_pos + len(ring), samples)
+                        combined[ring_pos:end_pos] += ring[:end_pos - ring_pos]
+        
+        elif defect_type == 'worn_joint':
+            # Worn/damaged rail joint creates a louder, harsher click
+            # Usually just one or two impacts
+            num_impacts = random.randint(2, 4)
+            
+            for i in range(num_impacts):
+                impact_time = random.uniform(0.1, duration - 0.1)
+                impact_pos = int(impact_time * self.sample_rate)
+                
+                if impact_pos < samples:
+                    # Loud metallic clang from damaged joint
+                    clang_freq = random.uniform(1400, 2000)
+                    clang = self.generate_tone(clang_freq, 0.025, amplitude * 0.9)
+                    clang_envelope = np.exp(-70 * np.linspace(0, 1, len(clang)))
+                    clang = clang * clang_envelope
+                    
+                    # Heavy bass thump from impact
+                    thump = self.generate_tone(150, 0.04, amplitude * 0.7)
+                    thump_envelope = np.exp(-45 * np.linspace(0, 1, len(thump)))
+                    thump = thump * thump_envelope
+                    
+                    # Prolonged ringing
+                    ring_duration = 0.08
+                    ring = self.generate_sweep(clang_freq, clang_freq * 0.7, ring_duration, amplitude * 0.3)
+                    
+                    end_pos = min(impact_pos + len(clang), samples)
+                    combined[impact_pos:end_pos] += clang[:end_pos - impact_pos]
+                    
+                    thump_pos = impact_pos - int(0.002 * self.sample_rate)
+                    if thump_pos >= 0 and thump_pos < samples:
+                        end_pos = min(thump_pos + len(thump), samples)
+                        combined[thump_pos:end_pos] += thump[:end_pos - thump_pos]
+                    
+                    ring_pos = impact_pos + int(0.01 * self.sample_rate)
+                    if ring_pos < samples:
+                        end_pos = min(ring_pos + len(ring), samples)
+                        combined[ring_pos:end_pos] += ring[:end_pos - ring_pos]
+        
+        else:  # 'irregularity'
+            # Random track irregularities cause unpredictable bumps
+            num_bumps = random.randint(3, 8)
+            
+            for i in range(num_bumps):
+                bump_time = random.uniform(0, duration)
+                bump_pos = int(bump_time * self.sample_rate)
+                
+                if bump_pos < samples:
+                    # Random bump characteristics
+                    bump_type = random.choice(['small', 'medium', 'large'])
+                    
+                    if bump_type == 'small':
+                        bump_duration = 0.02
+                        bump_amp = amplitude * 0.4
+                        bump_freq = random.uniform(300, 600)
+                    elif bump_type == 'medium':
+                        bump_duration = 0.035
+                        bump_amp = amplitude * 0.6
+                        bump_freq = random.uniform(200, 500)
+                    else:  # large
+                        bump_duration = 0.05
+                        bump_amp = amplitude * 0.8
+                        bump_freq = random.uniform(150, 400)
+                    
+                    bump = self.generate_tone(bump_freq, bump_duration, bump_amp)
+                    bump_envelope = np.exp(-40 * np.linspace(0, 1, len(bump)))
+                    bump = bump * bump_envelope
+                    
+                    # Add noise component for roughness
+                    noise = self.generate_noise(bump_duration, bump_amp * 0.5, low_freq=200, high_freq=1000)
+                    bump = bump + noise[:len(bump)]
+                    
+                    end_pos = min(bump_pos + len(bump), samples)
+                    combined[bump_pos:end_pos] += bump[:end_pos - bump_pos]
+        
+        # Apply overall envelope
+        envelope = np.ones(samples)
+        fade_samples = int(0.1 * self.sample_rate)
+        if samples > 2 * fade_samples:
+            envelope[:fade_samples] = np.linspace(0, 1, fade_samples)
+            envelope[-fade_samples:] = np.linspace(1, 0, fade_samples)
+        
+        return combined * envelope
 
     def play_sound(self, audio: np.ndarray, blocking: bool = True):
         """
@@ -789,6 +1052,22 @@ class MetroSoundSimulator:
             rumble_duration = min(random.uniform(10.0, 18.0), duration - elapsed)
             self.ambient_rumble(rumble_duration)
             elapsed += rumble_duration
+            
+            # Occasionally add a rail switch crossing (switches are common on metro lines)
+            if elapsed < duration - 1.5 and random.random() < 0.15:
+                print("  🛤️  Crossing rail switch (aiguillage)...")
+                switch_sound = self.generate_rail_switch(1.2, amplitude=0.22)
+                self.play_sound(switch_sound, blocking=False)
+                time.sleep(1.2)
+                elapsed += 1.2
+            
+            # Occasionally add rail defects (less frequent than switches)
+            if elapsed < duration - 1.0 and random.random() < 0.12:
+                print("  ⚠️  Rail defect detected...")
+                defect_sound = self.generate_rail_defects(0.8, amplitude=0.18)
+                self.play_sound(defect_sound, blocking=False)
+                time.sleep(0.8)
+                elapsed += 0.8
             
             # Occasionally add a gentle curve (realistic metro routes have curves)
             if elapsed < duration - 3.0 and random.random() < 0.25:
