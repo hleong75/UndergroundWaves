@@ -10,6 +10,9 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from collections import deque
 
+# Constants
+KMH_TO_MS = 3.6  # Conversion factor from km/h to m/s
+
 
 @dataclass
 class SoundContext:
@@ -49,7 +52,8 @@ class AIParameterLearner:
         self.parameter_history[param_name].append(value)
         
         # Update statistical model
-        if len(self.parameter_history[param_name]) > 10:
+        history_len = len(self.parameter_history[param_name])
+        if history_len > 10:
             values = np.array(self.parameter_history[param_name])
             new_mean = np.mean(values)
             new_std = np.std(values)
@@ -59,9 +63,8 @@ class AIParameterLearner:
             model['mean'] = (1 - self.learning_rate) * model['mean'] + self.learning_rate * new_mean
             model['std'] = (1 - self.learning_rate) * model['std'] + self.learning_rate * new_std
             
-            # Calculate trend
-            if len(values) > 1:
-                model['trend'] = (values[-1] - values[0]) / len(values)
+            # Calculate trend (safe division as we know history_len > 10 > 1)
+            model['trend'] = (values[-1] - values[0]) / history_len
     
     def predict_parameter(self, param_name: str, context: Optional[SoundContext] = None) -> float:
         """
@@ -172,7 +175,7 @@ class IntelligentNoiseGenerator:
             
             # Speed-dependent periodic variation (wheel rotation)
             wheel_circumference = 0.8  # meters
-            rotation_freq = context.speed / 3.6 / wheel_circumference  # Hz
+            rotation_freq = context.speed / KMH_TO_MS / wheel_circumference  # Hz
             
             if rotation_freq > 0:
                 periodic = 0.02 * np.sin(2 * np.pi * rotation_freq * t)

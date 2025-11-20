@@ -1331,6 +1331,7 @@ def main():
         print("  - Windows: Audio should work with pip install sounddevice\n")
     
     print("This program simulates realistic metro/subway sounds including:")
+    print("  - 🤖 AI-Enhanced sound generation")
     print("  - Ambient rumbling and engine noise")
     print("  - Random turns with metal screeching")
     print("  - Door closing sequences with warning beeps")
