@@ -4,11 +4,14 @@ A realistic metro/subway sound simulator that generates authentic underground ra
 
 ## Features
 
-- **Ambient Rumbling**: Continuous low-frequency rumble simulating metro movement along tracks
+- **Compressed Air Door Systems**: Realistic air pressure release, door motor sounds, and pneumatic hiss during door operation
+- **Compressed Air Brakes**: Air brake engagement and release sounds with friction effects
+- **Electric Traction Motors**: Harmonically rich motor whine with PWM inverter modulation
+- **Regenerative Braking**: Electric motor sounds during deceleration with falling pitch
+- **Power Inverter Sounds**: IGBT/MOSFET switching noise characteristic of modern electric trains
+- **Ambient Rumbling**: Continuous low-frequency rumble with electric motor hum in background
 - **Random Turn Events**: Sharp turns with realistic metal-on-metal screeching sounds
-- **Door Closures**: Complete door closing sequence with warning beeps and pneumatic hiss
-- **Station Arrivals**: Deceleration, stop, and door operations at stations
-- **Acceleration/Deceleration**: Dynamic pitch changes simulating speed changes
+- **Station Arrivals**: Complete sequence with electric idle sounds (compressor, auxiliaries)
 - **Realistic Timing**: Random event timing inspired by real metro operations
 
 ## Installation
@@ -42,10 +45,12 @@ python metro_sounds.py
 You'll be prompted to enter how many minutes you want the simulation to run (default is 2 minutes).
 
 The program will generate:
-- Continuous rumbling sounds as the metro travels
+- Continuous rumbling sounds with electric motor hum
 - Random screeching when taking sharp turns
-- Door closing sequences with warning beeps
-- Station arrival and departure sounds
+- Door closing sequences with compressed air and warning beeps
+- Electric motor acceleration and regenerative braking
+- Compressed air brake sounds
+- Station arrival and departure sounds with electric idle
 
 Press `Ctrl+C` at any time to stop the simulation.
 
@@ -56,11 +61,17 @@ The simulator uses:
 - **sounddevice** for real-time audio playback
 - Procedural audio synthesis to create realistic sounds:
   - Low-frequency noise for rumbling
-  - Frequency sweeps for screeching
-  - Sine waves for warning beeps
-  - High-frequency noise for pneumatic hiss
+  - Frequency sweeps for screeching and electric motor whine
+  - Sine waves for warning beeps and motor harmonics
+  - High-frequency noise for pneumatic air systems
+  - Exponential decay envelopes for compressed air release
+  - PWM modulation for power inverter sounds
+  - Harmonic synthesis for electric traction motors
 
-All sounds are generated in real-time using mathematical models inspired by actual metro/subway acoustics.
+All sounds are generated in real-time using mathematical models inspired by actual metro/subway acoustics, specifically modeling:
+- **Compressed air systems** (doors and brakes)
+- **Electric traction motors** with characteristic frequency sweeps
+- **Power electronics** (IGBT/PWM inverters at 4-8 kHz)
 
 ## Examples
 

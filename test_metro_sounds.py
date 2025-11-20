@@ -126,6 +126,61 @@ def test_amplitude_bounds():
     print("  ✓ Amplitude bounds test passed")
 
 
+def test_compressed_air_generation():
+    """Test compressed air sound generation."""
+    print("Testing compressed air generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test compressed air release
+    air_sound = simulator.generate_compressed_air_release(1.0, amplitude=0.25)
+    
+    # Check correct duration
+    expected_samples = 44100
+    assert len(air_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(air_sound)}"
+    
+    # Check that amplitude decays (later samples should be smaller on average)
+    first_half = np.mean(np.abs(air_sound[:len(air_sound)//2]))
+    second_half = np.mean(np.abs(air_sound[len(air_sound)//2:]))
+    assert first_half > second_half, "Compressed air should decay over time"
+    
+    print("  ✓ Compressed air generation test passed")
+
+
+def test_electric_motor_generation():
+    """Test electric motor sound generation."""
+    print("Testing electric motor generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test electric motor whine
+    motor_sound = simulator.generate_electric_motor_whine(1.0, 300, 800, amplitude=0.15)
+    
+    # Check correct duration
+    expected_samples = 44100
+    assert len(motor_sound) == expected_samples, f"Expected {expected_samples} samples, got {len(motor_sound)}"
+    
+    # Check non-zero output
+    assert np.max(np.abs(motor_sound)) > 0.01, "Motor sound should be audible"
+    
+    print("  ✓ Electric motor generation test passed")
+
+
+def test_inverter_generation():
+    """Test power inverter sound generation."""
+    print("Testing inverter sound generation...")
+    simulator = MetroSoundSimulator()
+    
+    # Test inverter sound
+    inverter_sound = simulator.generate_inverter_sound(0.5, amplitude=0.1)
+    
+    # Check samples generated
+    assert len(inverter_sound) > 0, "Inverter should produce audio samples"
+    
+    # Check it's not silent
+    assert np.std(inverter_sound) > 0, "Inverter sound should not be silent"
+    
+    print("  ✓ Inverter generation test passed")
+
+
 def run_all_tests():
     """Run all tests and report results."""
     print("\n" + "="*60)
@@ -140,6 +195,9 @@ def run_all_tests():
         test_audio_generation_non_empty,
         test_sample_rate_variations,
         test_amplitude_bounds,
+        test_compressed_air_generation,
+        test_electric_motor_generation,
+        test_inverter_generation,
     ]
     
     passed = 0
